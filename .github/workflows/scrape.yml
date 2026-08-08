@@ -1,0 +1,31 @@
+name: scrape-river
+
+on:
+  schedule:
+    - cron: '0 * * * *'      # hourly, UTC
+  workflow_dispatch:          # manual trigger button
+
+permissions:
+  contents: write
+
+concurrency:                  # stop overlapping runs racing on the same file
+  group: scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pandas requests lxml html5lib
+      - run: python scrape_river.py
+      - run: |
+          git config user.name  "github-actions"
+          git config user.email "actions@github.com"
+          git add data/river_log.csv
+          git diff --staged --quiet || git commit -m "river $(date -u +%FT%H:%M)"
+          git pull --rebase
+          git push
