@@ -1,0 +1,9 @@
+.env
+config.js
+.explanations_cache.json
+backend/tower_terrain.csv
+__pycache__/
+*.pyc
+*.parquet
+backend/data/
+backend/archive/
