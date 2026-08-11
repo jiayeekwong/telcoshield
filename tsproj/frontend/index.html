@@ -19,7 +19,7 @@
         --t3: #e8a23d;
         --t4: #9fb2c4;
         --accent: #1a5fb4;
-        --panel-w: 397px;
+        --panel-w: 477px;
       }
       * {
         box-sizing: border-box;
@@ -593,14 +593,16 @@
 
       /* ---------- overview charts ---------- */
       #overview,
-      #compare {
+      #compare,
+      #simulate {
         flex: 1;
         overflow-y: auto;
         display: none;
         padding: 14px 16px;
       }
       #overview.show,
-      #compare.show {
+      #compare.show,
+      #simulate.show {
         display: block;
       }
       .hero {
@@ -1038,6 +1040,282 @@
         color: var(--muted);
         line-height: 1.5;
       }
+
+      /* ---------- simulate ---------- */
+      #simulate {
+        flex: 1;
+        overflow-y: auto;
+        display: none;
+        padding: 14px 16px;
+      }
+      #simulate.show {
+        display: block;
+      }
+      .simmode {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      .simmode button {
+        flex: 1;
+        padding: 7px 0;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 11px;
+        cursor: pointer;
+        color: var(--muted);
+      }
+      /* fallback matters: --brand is not defined in this palette, so without it
+         background resolved to nothing while color:#fff still applied — the
+         active button rendered as white text on white */
+      .simmode button.on {
+        background: var(--brand, #8e1b2e);
+        color: #fff;
+        border-color: var(--brand, #8e1b2e);
+      }
+      .inspect {
+        border: 1px solid var(--line);
+        border-left: 3px solid #1f2328;
+        border-radius: 6px;
+        padding: 10px 12px;
+        margin: 12px 0;
+        background: #fafbfd;
+      }
+      .inspect h5 {
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 2px;
+      }
+      .inspect .st {
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        padding: 2px 6px;
+        border-radius: 8px;
+      }
+      .inspect .st.down {
+        background: #fdecef;
+        color: #a8203c;
+      }
+      .inspect .st.up {
+        background: #eaf5ed;
+        color: #1f6b3b;
+      }
+      .inspect .sub {
+        font-size: 10px;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .inspect .fig {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .inspect .fig b {
+        display: block;
+        font-size: 15px;
+        font-variant-numeric: tabular-nums;
+      }
+      .inspect .fig span {
+        font-size: 9px;
+        color: var(--muted);
+        display: block;
+        line-height: 1.3;
+      }
+      .nbl {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin: 6px 0 9px;
+      }
+      .nbl span {
+        font-size: 9.5px;
+        padding: 2px 6px;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      .nbl .up {
+        background: #eaf5ed;
+        color: #1f6b3b;
+      }
+      .nbl .down {
+        background: #fdecef;
+        color: #a8203c;
+      }
+      .inspect button {
+        width: 100%;
+        padding: 7px 0;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 11px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .inspect button.fail {
+        background: #a8203c;
+        color: #fff;
+        border-color: #a8203c;
+      }
+      .simres {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin: 12px 0;
+      }
+      .simres div {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 9px 10px;
+      }
+      .simres b {
+        display: block;
+        font-size: 19px;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.4px;
+      }
+      .simres span {
+        font-size: 9.5px;
+        color: var(--muted);
+        line-height: 1.3;
+        display: block;
+        margin-top: 2px;
+      }
+      .simres .hard {
+        background: #fdf2f4;
+        border-color: #e8c4cc;
+      }
+      .simres .hard b {
+        color: var(--t1);
+      }
+      .simres .casc {
+        background: #fff7ed;
+        border-color: #f0d9b5;
+      }
+      .simres .casc b {
+        color: #c4622d;
+      }
+      .simlist {
+        margin-top: 2px;
+      }
+
+      .simlegend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px 14px;
+        padding: 8px 10px;
+        background: #f7f9fc;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        margin-bottom: 11px;
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .simlegend span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .simlegend i {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        flex: none;
+        display: inline-block;
+      }
+      .simhead {
+        display: grid;
+        grid-template-columns: 64px 1fr 52px;
+        gap: 8px;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--muted);
+        font-weight: 700;
+        padding-bottom: 4px;
+        border-bottom: 1px solid var(--line);
+      }
+      .simrow {
+        display: grid;
+        grid-template-columns: 64px 1fr 52px;
+        gap: 8px;
+        align-items: center;
+        padding: 7px 0;
+        border-bottom: 1px solid #f1f4f8;
+        font-size: 11px;
+        cursor: pointer;
+      }
+      .simrow:hover {
+        background: #f7f9fc;
+      }
+      .simrow.on {
+        background: #fdf2f4;
+        box-shadow: inset 3px 0 0 var(--t1);
+      }
+      .simrow .id {
+        font-weight: 600;
+        font-size: 11px;
+      }
+      .simrow .id small {
+        display: block;
+        font-weight: 400;
+        font-size: 9px;
+        color: var(--muted);
+      }
+      .simbar {
+        height: 13px;
+        border-radius: 2px;
+        overflow: hidden;
+        display: flex;
+        background: #eef1f5;
+      }
+      .simbar i {
+        display: block;
+        height: 100%;
+      }
+      .simrow .p {
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+        text-align: right;
+        font-size: 11.5px;
+      }
+      #simfoot {
+        display: flex;
+        gap: 6px;
+        margin-top: 12px;
+      }
+      #simfoot button {
+        flex: 1;
+        padding: 6px 0;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 10.5px;
+        cursor: pointer;
+      }
+      #simfoot button:hover {
+        background: #f7f9fc;
+      }
+      .simhint {
+        font-size: 10.5px;
+        color: var(--muted);
+        line-height: 1.5;
+        margin-bottom: 10px;
+      }
+      .failx {
+        color: #7a8794;
+        font:
+          700 13px/16px "Segoe UI",
+          sans-serif;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
@@ -1059,9 +1337,11 @@
           <button onclick="tab('detail')">Detail</button>
           <button onclick="tab('overview')">Overview</button>
           <button onclick="tab('compare')">Compare</button>
+          <button onclick="tab('simulate')">Simulate</button>
         </div>
         <div id="overview"></div>
         <div id="compare"></div>
+        <div id="simulate"></div>
         <div id="register" class="show">
           <div id="sortbar">
             <button class="on" data-s="priority">Priority</button>
@@ -1475,7 +1755,14 @@
             fillOpacity: 0.92,
             className: t.escalated ? "pulse" : "",
           });
-          m.on("click", () => show(t));
+          m.on("click", () =>
+            document.getElementById("simulate").classList.contains("show")
+              ? // In Simulate a click INSPECTS. Failing is an explicit button in
+                // the inspect card — click-to-destroy made it impossible to look
+                // at a tower without changing the scenario.
+                inspectFail(t.tower_id)
+              : show(t),
+          );
           m.bindTooltip(`${t.tower_id} · #${t.rank}`, {
             direction: "top",
             offset: [0, -6],
@@ -1855,15 +2142,22 @@ Write the briefing for this tower.`;
           .getElementById("compare")
           .classList.toggle("show", which === "compare");
         document
+          .getElementById("simulate")
+          .classList.toggle("show", which === "simulate");
+        document
           .getElementById("detail")
           .classList.toggle("hide", which !== "detail");
-        const order = ["register", "detail", "overview", "compare"];
+        const order = ["register", "detail", "overview", "compare", "simulate"];
         document
           .querySelectorAll("#tabs button")
           .forEach((b, i) => b.classList.toggle("on", order[i] === which));
         if (which === "overview") renderOverview();
         if (which === "compare") renderCompare();
         else gCmp.clearLayers();
+        if (which === "simulate") {
+          if (SIMMODE === "scenario" && !FAILED.size) applyScenario();
+          else renderSimulate();
+        } else gFail.clearLayers();
       }
 
       function visible() {
@@ -2271,7 +2565,12 @@ Write the briefing for this tower.`;
       const KM_PER_DEG = 111;
       function focusOn(t) {
         gFocus.clearLayers();
-        if (!t) return;
+        // the Detail overlay would otherwise sit on top of the simulation
+        if (
+          !t ||
+          document.getElementById("simulate").classList.contains("show")
+        )
+          return;
         const col = TIER[t._t].c;
 
         const near = TOWERS.filter((o) => {
@@ -2832,6 +3131,373 @@ Write the briefing for this tower.`;
         map.eachLayer((l) => {
           if (l instanceof L.TileLayer) l.bringToBack();
         });
+      }
+
+      // ---------------- simulate tower failure ----------------
+      // The dashboard already shows pop_sole: the people a single tower serves
+      // that nobody else covers. What it cannot show is what happens when many
+      // towers fail AT ONCE — because the neighbour you were relying on may be
+      // underwater too. That cascade term is what this tool exposes.
+      const FAILED = new Set();
+      let SIMMODE = "scenario";
+      let SIMTH = 0.5;
+      let NB = null; // tower_id -> overlapping neighbour ids
+      const gFail = L.layerGroup();
+
+      function neighbourIndex() {
+        if (NB) return NB;
+        NB = {};
+        TOWERS.forEach((t) => {
+          NB[t.tower_id] = TOWERS.filter((o) => {
+            if (o.tower_id === t.tower_id) return false;
+            const dx =
+              (o.lon - t.lon) * KM_PER_DEG * Math.cos((t.lat * Math.PI) / 180);
+            const dy = (o.lat - t.lat) * KM_PER_DEG;
+            return Math.hypot(dx, dy) <= t.radius_km + o.radius_km;
+          }).map((o) => o.tower_id);
+        });
+        return NB;
+      }
+
+      function simulate() {
+        const nb = neighbourIndex();
+        let definite = 0,
+          cascade = 0;
+        const rows = [];
+        FAILED.forEach((id) => {
+          const t = TOWERS.find((x) => x.tower_id === id);
+          if (!t) return;
+          // pop_sole is exact: these users have no other tower at all
+          definite += t.pop_sole;
+          // Everyone else in the footprint had a fallback. How much of that
+          // fallback is also down? isolation is pop_sole over the RAW footprint
+          // population, so raw = pop_sole / isolation.
+          let extra = 0;
+          if (t.isolation > 0) {
+            const raw = t.pop_sole / t.isolation;
+            const shared = Math.max(0, raw - t.pop_sole);
+            const n = nb[id] || [];
+            if (n.length) {
+              const downFrac = n.filter((x) => FAILED.has(x)).length / n.length;
+              extra = shared * downFrac;
+            }
+          }
+          cascade += extra;
+          rows.push({
+            t,
+            definite: t.pop_sole,
+            extra,
+            nbTotal: (nb[id] || []).length,
+            nbDown: (nb[id] || []).filter((x) => FAILED.has(x)).length,
+          });
+        });
+        rows.sort((a, b) => b.definite + b.extra - (a.definite + a.extra));
+        return { definite, cascade, rows };
+      }
+
+      function applyScenario() {
+        FAILED.clear();
+        SIMFOCUS = null;
+        TOWERS.forEach((t) => {
+          if (t.baseline >= SIMTH) FAILED.add(t.tower_id);
+        });
+        renderSimulate();
+      }
+      function toggleFail(id) {
+        FAILED.has(id) ? FAILED.delete(id) : FAILED.add(id);
+        SIMMODE = "manual";
+        SIMFOCUS = id; // stay on the tower just changed
+        renderSimulate();
+      }
+      function clearFail() {
+        FAILED.clear();
+        SIMFOCUS = null;
+        renderSimulate();
+      }
+
+      // Drawing every failed footprint as an outlined ring produced 80+
+      // overlapping circles — unreadable. Instead: failed coverage is a fill-only
+      // wash that merges into a region, each failed site carries an X, and rings
+      // appear ONLY for the site currently being inspected.
+      let SIMFOCUS = null;
+
+      function drawFailures() {
+        gFail.clearLayers();
+        if (!document.getElementById("simulate").classList.contains("show")) {
+          map.removeLayer(gFail);
+          return;
+        }
+        const nb = neighbourIndex();
+
+        // 1. lost coverage as a single soft wash, no strokes
+        FAILED.forEach((id) => {
+          const t = TOWERS.find((x) => x.tower_id === id);
+          if (!t) return;
+          gFail.addLayer(
+            L.circle([t.lat, t.lon], {
+              radius: t.radius_km * 1000,
+              stroke: false,
+              fillColor: "#a8203c",
+              fillOpacity: 0.09,
+              interactive: false,
+            }),
+          );
+        });
+
+        // 2. the inspected site only: its footprint, and its neighbours
+        //    coloured by whether they survived to absorb the load
+        if (SIMFOCUS) {
+          const t = TOWERS.find((x) => x.tower_id === SIMFOCUS);
+          if (t) {
+            (nb[SIMFOCUS] || []).forEach((oid) => {
+              const o = TOWERS.find((x) => x.tower_id === oid);
+              if (!o) return;
+              const down = FAILED.has(oid);
+              gFail.addLayer(
+                L.circle([o.lat, o.lon], {
+                  radius: o.radius_km * 1000,
+                  color: down ? "#a8203c" : "#1f6b3b",
+                  weight: 1.5,
+                  dashArray: down ? "4 4" : null,
+                  fillColor: down ? "#a8203c" : "#1f6b3b",
+                  fillOpacity: down ? 0.1 : 0.12,
+                  interactive: false,
+                }),
+              );
+              gFail.addLayer(
+                L.polyline(
+                  [
+                    [t.lat, t.lon],
+                    [o.lat, o.lon],
+                  ],
+                  {
+                    color: down ? "#a8203c" : "#1f6b3b",
+                    weight: 1.4,
+                    opacity: 0.55,
+                    interactive: false,
+                  },
+                ),
+              );
+            });
+            gFail.addLayer(
+              L.circle([t.lat, t.lon], {
+                radius: t.radius_km * 1000,
+                color: "#1f2328",
+                weight: 2.4,
+                fill: false,
+                interactive: false,
+              }),
+            );
+            map.setView([t.lat, t.lon], Math.max(map.getZoom(), 11), {
+              animate: true,
+            });
+          }
+        }
+
+        // a surviving tower under inspection gets a ring, not an X
+        if (SIMFOCUS && !FAILED.has(SIMFOCUS)) {
+          const t = TOWERS.find((x) => x.tower_id === SIMFOCUS);
+          if (t)
+            gFail.addLayer(
+              L.circleMarker([t.lat, t.lon], {
+                radius: 10,
+                color: "#1f2328",
+                weight: 2.4,
+                fill: false,
+                interactive: false,
+              }),
+            );
+        }
+
+        // 3. X marker on every failed site, drawn last so it stays on top
+        FAILED.forEach((id) => {
+          const t = TOWERS.find((x) => x.tower_id === id);
+          if (!t) return;
+          const on = id === SIMFOCUS;
+          gFail.addLayer(
+            L.marker([t.lat, t.lon], {
+              icon: L.divIcon({
+                className: "",
+                iconSize: [16, 16],
+                iconAnchor: [8, 8],
+                html: `<div class="failx" style="color:${on ? "#1f2328" : "#a8203c"};
+                ${on ? "font-size:16px" : ""}">&#10005;</div>`,
+              }),
+              interactive: false,
+            }),
+          );
+        });
+
+        gFail.addTo(map);
+      }
+
+      function inspectFail(id) {
+        SIMFOCUS = SIMFOCUS === id ? null : id;
+        renderSimulate();
+      }
+
+      // Any tower can be inspected, failed or not. This is what makes the tool
+      // explorable rather than a one-way destructive click.
+      function inspectCard() {
+        if (!SIMFOCUS) return "";
+        const t = TOWERS.find((x) => x.tower_id === SIMFOCUS);
+        if (!t) return "";
+        const nb = neighbourIndex()[SIMFOCUS] || [];
+        const down = FAILED.has(SIMFOCUS);
+        const nbDown = nb.filter((x) => FAILED.has(x)).length;
+
+        let extra = 0;
+        if (down && t.isolation > 0 && nb.length) {
+          const raw = t.pop_sole / t.isolation;
+          extra = Math.max(0, raw - t.pop_sole) * (nbDown / nb.length);
+        }
+
+        return `<div class="inspect">
+          <h5>${t.tower_id}
+            <span class="st ${down ? "down" : "up"}">${down ? "DOWN" : "OPERATING"}</span></h5>
+          <div class="sub">rank ${t.rank} · flood ${t.baseline.toFixed(2)} ·
+            ${(t.isolation * 100).toFixed(0)}% of users have no alternative</div>
+          <div class="fig">
+            <div><b>${fmt(t.pop_sole)}</b><span>${down ? "losing service now" : "would lose service"}</span></div>
+            <div><b>${down ? fmt(extra) : "—"}</b><span>${down ? "plus cascade, " + nbDown + " of " + nb.length + " fallbacks down" : "cascade only applies once failed"}</span></div>
+          </div>
+          <div style="font-size:9.5px;color:var(--muted)">Overlapping neighbours — click to jump</div>
+          <div class="nbl">${
+            nb.length
+              ? nb
+                  .map(
+                    (id) => `<span class="${FAILED.has(id) ? "down" : "up"}"
+                  onclick="inspectFail('${id}')">${id}</span>`,
+                  )
+                  .join("")
+              : '<span style="background:#fdecef;color:#a8203c">none — every user here is stranded</span>'
+          }</div>
+          <button class="${down ? "" : "fail"}" onclick="toggleFail('${SIMFOCUS}')">
+            ${down ? "Restore this tower" : "Fail this tower"}</button>
+        </div>`;
+      }
+
+      function renderSimulate() {
+        const el = document.getElementById("simulate");
+        const { definite, cascade, rows } = simulate();
+        const netPop = TOWERS.reduce((s, t) => s + t.pop_served, 0);
+        const share = netPop ? (definite + cascade) / netPop : 0;
+
+        el.innerHTML = `
+          <div class="simmode">
+            <button class="${SIMMODE === "scenario" ? "on" : ""}" onclick="SIMMODE='scenario';applyScenario()">Flood scenario</button>
+            <button class="${SIMMODE === "manual" ? "on" : ""}" onclick="SIMMODE='manual';renderSimulate()">Pick towers</button>
+          </div>
+
+          ${
+            SIMMODE === "scenario"
+              ? `<div class="fgrp">
+                 <label>Fail every tower with susceptibility &ge; <b>${SIMTH.toFixed(2)}</b></label>
+                 <input class="rng" type="range" min="0.2" max="0.9" step="0.05" value="${SIMTH}"
+                   oninput="SIMTH=+this.value;applyScenario()" />
+               </div>
+               <div class="simhint">A monsoon flood does not take out one tower. It takes out
+                 every tower on low ground at once — which is why the fallback assumption breaks.</div>`
+              : `<div class="simhint">Click any tower on the map to inspect it, then use
+                 <b>Fail</b> or <b>Restore</b> in the card below. <b>${FAILED.size}</b> towers down.</div>`
+          }
+
+          ${inspectCard()}
+
+          <div class="simres">
+            <div class="hard"><b>${fmt(definite)}</b><span>lose service outright — no other tower covers them</span></div>
+            <div class="casc"><b>${fmt(cascade)}</b><span>additionally lost — their fallback tower is down too</span></div>
+            <div><b>${fmt(definite + cascade)}</b><span>total without service</span></div>
+            <div><b>${FAILED.size}</b><span>towers down · ${(share * 100).toFixed(1)}% of network population</span></div>
+          </div>
+
+          ${
+            cascade > 0
+              ? `<div class="cap" style="margin-bottom:10px">
+            Cascade adds <b>${((cascade / (definite || 1)) * 100).toFixed(0)}%</b> on top of the
+            direct loss. Redundancy only helps when the neighbour survives.</div>`
+              : ""
+          }
+
+          <div class="simlegend">
+            <span><i style="background:#a8203c;opacity:.25"></i>coverage lost</span>
+            <span><i style="background:#1f6b3b;opacity:.3"></i>neighbour still up</span>
+            <span><span style="color:#a8203c;font-weight:700">&#10005;</span> tower down</span>
+            <span style="color:#39506e">click a row to inspect one site</span>
+          </div>
+
+          ${
+            rows.length
+              ? `<div style="font-size:11px;font-weight:600;margin-bottom:5px">Worst affected sites</div>
+          <div class="simhead"><span>Tower</span><span>Direct loss + cascade</span><span style="text-align:right">People</span></div>
+          <div class="simlist">${(() => {
+            const top = rows.slice(0, 12);
+            const mx = Math.max(...top.map((r) => r.definite + r.extra), 1);
+            return top
+              .map(
+                (r) => `
+              <div class="simrow ${SIMFOCUS === r.t.tower_id ? "on" : ""}" onclick="inspectFail('${r.t.tower_id}')">
+                <span class="id">${r.t.tower_id}<small>${r.nbDown}/${r.nbTotal} nbrs down</small></span>
+                <span>
+                  <span class="simbar">
+                    <i style="width:${(r.definite / mx) * 100}%;background:#a8203c"></i>
+                    <i style="width:${(r.extra / mx) * 100}%;background:#e08a3c"></i>
+                  </span>
+                  <span style="font-size:9px;color:var(--muted);display:block;margin-top:2px">
+                    ${fmt(r.definite)} direct${r.extra > 0 ? ` + ${fmt(r.extra)} cascade` : ""}</span>
+                </span>
+                <span class="p">${fmt(r.definite + r.extra)}</span>
+              </div>`,
+              )
+              .join("");
+          })()}</div>`
+              : ""
+          }
+
+          <div id="simfoot">
+            <button onclick="clearFail()">Reset</button>
+            <button onclick="exportSim()">Export CSV</button>
+          </div>
+
+          <div class="cap" style="margin-top:10px">Direct loss is exact — it is the population
+            inside each footprint that no other tower covers. The cascade term is an estimate:
+            shared population is apportioned evenly across a site's overlapping neighbours,
+            so it scales with how many of those neighbours also fail.</div>`;
+        drawFailures();
+      }
+
+      function exportSim() {
+        const { rows } = simulate();
+        const cols = [
+          "tower_id",
+          "rank",
+          "baseline",
+          "pop_sole",
+          "cascade_estimate",
+          "total_lost",
+          "neighbours",
+          "neighbours_down",
+        ];
+        const csv = [cols.join(",")]
+          .concat(
+            rows.map((r) =>
+              [
+                r.t.tower_id,
+                r.t.rank,
+                r.t.baseline,
+                Math.round(r.definite),
+                Math.round(r.extra),
+                Math.round(r.definite + r.extra),
+                r.nbTotal,
+                r.nbDown,
+              ].join(","),
+            ),
+          )
+          .join("\n");
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+        a.download = `telcoshield_failure_scenario_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
       }
 
       function show(t) {
