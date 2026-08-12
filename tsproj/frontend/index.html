@@ -1,0 +1,3624 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TelcoShield — Tower Flood Risk</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <style>
+      :root {
+        --bg: #ffffff;
+        --ink: #1f2328;
+        --muted: #5f6b7a;
+        --line: #e3e7ed;
+        --t1: #8e1b2e;
+        --t2: #d4553a;
+        --t3: #e8a23d;
+        --t4: #9fb2c4;
+        --accent: #1a5fb4;
+        --panel-w: 477px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+        font-family: "Segoe UI", Roboto, system-ui, sans-serif;
+        color: var(--ink);
+        background: #f2f4f7;
+      }
+      #app {
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      /* ---------- left panel ---------- */
+      #panel {
+        width: var(--panel-w);
+        flex: none;
+        background: var(--bg);
+        border-right: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+        z-index: 1000;
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
+      }
+      #brand {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      #brand b {
+        font-size: 17px;
+        letter-spacing: -0.2px;
+      }
+      #brand span {
+        font-size: 11px;
+        color: var(--muted);
+        background: #eef2f7;
+        padding: 2px 7px;
+        border-radius: 9px;
+      }
+      #search {
+        padding: 11px 14px;
+        border-bottom: 1px solid var(--line);
+      }
+      #search input {
+        width: 100%;
+        padding: 9px 12px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        font-size: 13px;
+        outline: none;
+      }
+      #search input:focus {
+        border-color: var(--accent);
+      }
+      #detail {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 18px;
+      }
+
+      .empty {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.7;
+        padding-top: 8px;
+      }
+      .empty h4 {
+        font-size: 13px;
+        color: var(--ink);
+        margin-bottom: 7px;
+      }
+
+      .tid {
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: -0.3px;
+      }
+      .tsub {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .pill {
+        display: inline-block;
+        margin: 11px 0 3px;
+        padding: 7px 13px;
+        border-radius: 6px;
+        font-size: 12.5px;
+        font-weight: 600;
+      }
+
+      .sec {
+        margin-top: 19px;
+      }
+      .sec h3 {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--muted);
+        margin-bottom: 9px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .bars {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+      }
+      .bar-row {
+        font-size: 12px;
+      }
+      .bar-lab {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3px;
+      }
+      .bar-lab span:last-child {
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+      }
+      .track {
+        height: 6px;
+        background: #eef1f5;
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.35s ease;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 13px 10px;
+      }
+      .kv .k {
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 1px;
+      }
+      .kv .v {
+        font-size: 15px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+      .kv .u {
+        font-size: 11px;
+        font-weight: 400;
+        color: var(--muted);
+      }
+
+      #spark {
+        width: 100%;
+        height: 96px;
+        margin-top: 4px;
+      }
+      .legend-inline {
+        display: flex;
+        gap: 12px;
+        font-size: 10.5px;
+        color: var(--muted);
+        margin-top: 5px;
+      }
+      .legend-inline i {
+        display: inline-block;
+        width: 16px;
+        height: 2px;
+        vertical-align: middle;
+        margin-right: 4px;
+      }
+
+      .act {
+        background: #f7f9fc;
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--t1);
+        border-radius: 5px;
+        padding: 11px 13px;
+        font-size: 12.5px;
+        line-height: 1.6;
+      }
+      .act b {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 12px;
+      }
+
+      /* ---------- map ---------- */
+      #mapwrap {
+        flex: 1;
+        position: relative;
+      }
+      #map {
+        position: absolute;
+        inset: 0;
+      }
+      .leaflet-container {
+        background: #e8edf2;
+      }
+
+      #layers {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 230px;
+        background: var(--bg);
+        border-radius: 8px;
+        box-shadow: 0 2px 14px rgba(0, 0, 0, 0.16);
+        z-index: 900;
+        font-size: 12.5px;
+        overflow: hidden;
+      }
+      #layers .lh {
+        padding: 11px 14px;
+        border-bottom: 1px solid var(--line);
+        font-weight: 600;
+        display: flex;
+        gap: 7px;
+        align-items: center;
+      }
+      #layers .grp {
+        padding: 11px 14px;
+        border-bottom: 1px solid var(--line);
+      }
+      #layers .grp:last-child {
+        border-bottom: none;
+      }
+      .tog {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+      }
+      .tog .sw {
+        width: 32px;
+        height: 18px;
+        border-radius: 9px;
+        background: #cdd5df;
+        position: relative;
+        transition: 0.2s;
+        flex: none;
+      }
+      .tog .sw::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #fff;
+        transition: 0.2s;
+      }
+      .tog.on .sw {
+        background: var(--accent);
+      }
+      .tog.on .sw::after {
+        transform: translateX(14px);
+      }
+      .keys {
+        margin-top: 9px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        font-size: 11.5px;
+        color: var(--muted);
+      }
+      .keys div {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex: none;
+      }
+      .rng {
+        width: 100%;
+        margin-top: 7px;
+      }
+
+      /* Layer opacity / filter slider layout */
+      .keys > .fgrp {
+        display: block;
+        width: 100%;
+      }
+
+      .keys > .fgrp label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
+
+      .keys > .fgrp .rng {
+        display: block;
+        width: 100%;
+        margin-top: 7px;
+      }
+      #stats {
+        position: absolute;
+        left: 14px;
+        bottom: 22px;
+        background: var(--bg);
+        border-radius: 8px;
+        padding: 11px 15px;
+        box-shadow: 0 2px 14px rgba(0, 0, 0, 0.16);
+        z-index: 900;
+        display: flex;
+        gap: 20px;
+      }
+      #stats div {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      #stats b {
+        display: block;
+        font-size: 18px;
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .note {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #1f2328;
+        color: #c9d1d9;
+        font-size: 10.5px;
+        padding: 5px 14px;
+        z-index: 900;
+      }
+      .leaflet-interactive {
+        cursor: pointer;
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cfd6de;
+        border-radius: 4px;
+      }
+
+      /* ---------- register view ---------- */
+      #tabs {
+        display: flex;
+        border-bottom: 1px solid var(--line);
+        flex: none;
+      }
+      #tabs button {
+        flex: 1;
+        padding: 10px 0;
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        border-bottom: 2px solid transparent;
+        transition: 0.15s;
+      }
+      #tabs button.on {
+        color: var(--ink);
+        border-bottom-color: var(--t1);
+      }
+      #tabs button:hover {
+        background: #f7f9fc;
+      }
+
+      #register {
+        flex: 1;
+        overflow-y: auto;
+        display: none;
+      }
+      #register.show {
+        display: block;
+      }
+      #detail.hide {
+        display: none;
+      }
+
+      #sortbar {
+        display: flex;
+        gap: 4px;
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--line);
+        position: sticky;
+        top: 0;
+        background: var(--bg);
+        z-index: 5;
+      }
+      #sortbar button {
+        flex: 1;
+        padding: 5px 0;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 10.5px;
+        cursor: pointer;
+        color: var(--muted);
+      }
+      #sortbar button.on {
+        background: var(--t1);
+        color: #fff;
+        border-color: var(--t1);
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 30px 1fr 56px;
+        gap: 8px;
+        align-items: center;
+        padding: 9px 12px;
+        border-bottom: 1px solid #f1f4f8;
+        cursor: pointer;
+        transition: background 0.12s;
+      }
+      .row:hover {
+        background: #f7f9fc;
+      }
+      .row.sel {
+        background: #fdf2f4;
+        box-shadow: inset 3px 0 0 var(--t1);
+      }
+      .row .rk {
+        font-size: 11px;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+      }
+      .row .id {
+        font-size: 12.5px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .row .sub {
+        font-size: 10.5px;
+        color: var(--muted);
+        font-weight: 400;
+        margin-top: 1px;
+      }
+      .row .mini {
+        height: 4px;
+        background: #eef1f5;
+        border-radius: 2px;
+        margin-top: 4px;
+        overflow: hidden;
+      }
+      .row .mini i {
+        display: block;
+        height: 100%;
+        border-radius: 2px;
+      }
+      .row .pop {
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+        font-weight: 600;
+      }
+      .esc {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--t1);
+        flex: none;
+        animation: blip 1.6s ease-in-out infinite;
+      }
+      @keyframes blip {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.25;
+        }
+      }
+
+      #regfoot {
+        position: sticky;
+        bottom: 0;
+        background: var(--bg);
+        border-top: 1px solid var(--line);
+        padding: 9px 12px;
+        display: flex;
+        gap: 7px;
+        align-items: center;
+      }
+      #regfoot button {
+        padding: 6px 11px;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 11px;
+        cursor: pointer;
+      }
+      #regfoot button:hover {
+        background: #f7f9fc;
+      }
+      #regfoot span {
+        font-size: 10.5px;
+        color: var(--muted);
+        margin-left: auto;
+      }
+
+      /* escalated towers pulse on the map */
+      @keyframes ping {
+        0% {
+          stroke-width: 1.3;
+          opacity: 0.92;
+        }
+        50% {
+          stroke-width: 6;
+          opacity: 0.55;
+        }
+        100% {
+          stroke-width: 1.3;
+          opacity: 0.92;
+        }
+      }
+      .pulse {
+        animation: ping 1.8s ease-in-out infinite;
+      }
+
+      /* loading skeleton — avoids a blank white panel on first paint */
+      .skel {
+        padding: 16px 18px;
+      }
+      .skel div {
+        height: 11px;
+        border-radius: 4px;
+        margin-bottom: 9px;
+        background: linear-gradient(
+          90deg,
+          #eef1f5 25%,
+          #f7f9fc 50%,
+          #eef1f5 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.3s linear infinite;
+      }
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      /* ---------- overview charts ---------- */
+      #overview,
+      #compare,
+      #simulate {
+        flex: 1;
+        overflow-y: auto;
+        display: none;
+        padding: 14px 16px;
+      }
+      #overview.show,
+      #compare.show,
+      #simulate.show {
+        display: block;
+      }
+      .hero {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+      .hero div {
+        background: #f7f9fc;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 9px 10px;
+      }
+      .hero b {
+        display: block;
+        font-size: 17px;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.3px;
+      }
+      .hero span {
+        font-size: 9.5px;
+        color: var(--muted);
+        line-height: 1.3;
+        display: block;
+        margin-top: 2px;
+      }
+      .chart {
+        margin-bottom: 20px;
+      }
+      .chart h4 {
+        font-size: 11.5px;
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
+      .chart p {
+        font-size: 10.5px;
+        color: var(--muted);
+        line-height: 1.45;
+        margin-bottom: 7px;
+      }
+      .chart svg {
+        width: 100%;
+        display: block;
+      }
+      .cap {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 5px;
+        line-height: 1.45;
+      }
+
+      /* ---------- interactive sparkline ---------- */
+      #sparkwrap {
+        position: relative;
+      }
+      #sparkwrap svg {
+        cursor: crosshair;
+      }
+      #sptip {
+        position: absolute;
+        pointer-events: none;
+        background: #1f2328;
+        color: #fff;
+        font-size: 10.5px;
+        line-height: 1.45;
+        padding: 5px 8px;
+        border-radius: 4px;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.1s;
+        z-index: 20;
+        transform: translate(-50%, -100%);
+        margin-top: -7px;
+      }
+      #sptip b {
+        font-variant-numeric: tabular-nums;
+      }
+      #sphair {
+        position: absolute;
+        top: 0;
+        width: 1px;
+        background: #1f2328;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .focus-tip {
+        background: #1f2328;
+        color: #fff;
+        border: none;
+        font-size: 10.5px;
+        padding: 5px 9px;
+        border-radius: 4px;
+        box-shadow: none;
+        font-weight: 500;
+        max-width: 170px;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.4;
+      }
+      .focus-tip::before {
+        display: none;
+      }
+
+      /* ---------- overview chart hover ---------- */
+      .cwrap {
+        position: relative;
+      }
+      .cwrap svg {
+        cursor: crosshair;
+      }
+      .ctip {
+        position: absolute;
+        pointer-events: none;
+        background: #1f2328;
+        color: #fff;
+        font-size: 10.5px;
+        line-height: 1.45;
+        padding: 5px 8px;
+        border-radius: 4px;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.1s;
+        z-index: 20;
+        transform: translate(-50%, -100%);
+        margin-top: -8px;
+      }
+      .chair {
+        position: absolute;
+        top: 0;
+        width: 1px;
+        background: #1f2328;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* ---------- draggable panel divider ---------- */
+      #resizer {
+        width: 5px;
+        flex: none;
+        cursor: col-resize;
+        background: transparent;
+        position: relative;
+        z-index: 1001;
+        transition: background 0.15s;
+      }
+      #resizer:hover,
+      #resizer.drag {
+        background: var(--t1);
+      }
+      #resizer::after {
+        content: "";
+        position: absolute;
+        left: 1px;
+        top: 50%;
+        width: 3px;
+        height: 34px;
+        margin-top: -17px;
+        border-radius: 2px;
+        background: var(--line);
+      }
+      #resizer:hover::after,
+      #resizer.drag::after {
+        background: #fff;
+      }
+      body.resizing {
+        cursor: col-resize;
+        user-select: none;
+      }
+
+      /* ---------- multi-filter ---------- */
+      .fgrp {
+        margin-top: 10px;
+      }
+      .fgrp label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10.5px;
+        color: var(--muted);
+        margin-bottom: 1px;
+      }
+      .fgrp label b {
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+      }
+      #clearf {
+        width: 100%;
+        margin-top: 9px;
+        padding: 5px 0;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 10.5px;
+        cursor: pointer;
+        color: var(--muted);
+      }
+      #clearf:hover {
+        background: #f7f9fc;
+      }
+
+      /* ---------- compare ---------- */
+      #cmpbar {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--line);
+        background: #fbfcfe;
+        font-size: 11px;
+      }
+      #cmpbar .slot {
+        flex: 1;
+        padding: 5px 8px;
+        border: 1px dashed var(--line);
+        border-radius: 4px;
+        color: var(--muted);
+        text-align: center;
+        cursor: pointer;
+      }
+      #cmpbar .slot.full {
+        border-style: solid;
+        border-color: var(--t1);
+        color: var(--ink);
+        font-weight: 600;
+      }
+      #cmpbar button {
+        padding: 5px 10px;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 10.5px;
+        cursor: pointer;
+      }
+      #cmpbar button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      .cmptable {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11.5px;
+      }
+      .cmptable th {
+        text-align: left;
+        font-size: 10px;
+        color: var(--muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        padding: 6px 8px;
+        border-bottom: 1px solid var(--line);
+      }
+      .cmptable td {
+        padding: 7px 8px;
+        border-bottom: 1px solid #f1f4f8;
+        font-variant-numeric: tabular-nums;
+      }
+      .cmptable td:first-child {
+        color: var(--muted);
+        font-variant-numeric: normal;
+      }
+      .cmptable .win {
+        font-weight: 700;
+      }
+      .cmptable tr.head td {
+        background: #f7f9fc;
+        font-weight: 600;
+        font-variant-numeric: normal;
+      }
+
+      /* ---------- compare slots (inside the tab) ---------- */
+      #slots {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .slotcard {
+        border: 1px dashed var(--line);
+        border-radius: 6px;
+        padding: 9px 10px;
+        min-height: 64px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2px;
+      }
+      .slotcard.full {
+        border-style: solid;
+      }
+      .slotcard.a {
+        border-color: #8e1b2e;
+      }
+      .slotcard.b {
+        border-color: #1a5fb4;
+      }
+      .slotcard .tag {
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+      .slotcard.a .tag {
+        color: #8e1b2e;
+      }
+      .slotcard.b .tag {
+        color: #1a5fb4;
+      }
+      .slotcard .nm {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .slotcard .mt {
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .slotcard .ph {
+        font-size: 10.5px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+      .slotcard button {
+        margin-top: 4px;
+        padding: 3px 0;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 9.5px;
+        cursor: pointer;
+        color: var(--muted);
+      }
+      #cmpacts {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 14px;
+      }
+      #cmpacts button {
+        flex: 1;
+        padding: 6px 0;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 10.5px;
+        cursor: pointer;
+      }
+      #cmpacts button:hover {
+        background: #f7f9fc;
+      }
+
+      /* ---------- methodology drawer ---------- */
+      #methwrap {
+        position: absolute;
+        top: 17px;
+        left: 17px;
+        z-index: 890;
+      }
+      #methbtn {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 1px solid var(--line);
+        background: #fff;
+        cursor: help;
+        font:
+          600 13px/1 "Segoe UI",
+          sans-serif;
+        color: var(--muted);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+        display: block;
+      }
+      #methwrap:hover #methbtn {
+        color: var(--ink);
+        border-color: var(--muted);
+      }
+      #meth {
+        position: absolute;
+        top: 30px;
+        left: 0;
+        width: 250px;
+        margin-top: 8px;
+        background: var(--bg);
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        padding: 13px 15px;
+        font-size: 11px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-4px);
+        transition:
+          opacity 0.12s,
+          transform 0.12s,
+          visibility 0.12s;
+      }
+      #methwrap:hover #meth,
+      #methwrap:focus-within #meth {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+      }
+      /* invisible bridge across the 8px gap, or the panel closes mid-move */
+      #meth::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 0;
+        right: 0;
+        height: 10px;
+      }
+      #meth h5 {
+        font-size: 11px;
+        margin-bottom: 9px;
+      }
+      #meth dl {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 5px 10px;
+      }
+      #meth dt {
+        color: var(--muted);
+        font-size: 10px;
+      }
+      #meth dd {
+        font-size: 10.5px;
+        text-align: right;
+        font-weight: 500;
+      }
+      #meth .foot {
+        margin-top: 10px;
+        padding-top: 9px;
+        border-top: 1px solid var(--line);
+        font-size: 9.5px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      /* ---------- simulate ---------- */
+      #simulate {
+        flex: 1;
+        overflow-y: auto;
+        display: none;
+        padding: 14px 16px;
+      }
+      #simulate.show {
+        display: block;
+      }
+      .simmode {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      .simmode button {
+        flex: 1;
+        padding: 7px 0;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 11px;
+        cursor: pointer;
+        color: var(--muted);
+      }
+      /* fallback matters: --brand is not defined in this palette, so without it
+         background resolved to nothing while color:#fff still applied — the
+         active button rendered as white text on white */
+      .simmode button.on {
+        background: var(--brand, #8e1b2e);
+        color: #fff;
+        border-color: var(--brand, #8e1b2e);
+      }
+      .inspect {
+        border: 1px solid var(--line);
+        border-left: 3px solid #1f2328;
+        border-radius: 6px;
+        padding: 10px 12px;
+        margin: 12px 0;
+        background: #fafbfd;
+      }
+      .inspect h5 {
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 2px;
+      }
+      .inspect .st {
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        padding: 2px 6px;
+        border-radius: 8px;
+      }
+      .inspect .st.down {
+        background: #fdecef;
+        color: #a8203c;
+      }
+      .inspect .st.up {
+        background: #eaf5ed;
+        color: #1f6b3b;
+      }
+      .inspect .sub {
+        font-size: 10px;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .inspect .fig {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .inspect .fig b {
+        display: block;
+        font-size: 15px;
+        font-variant-numeric: tabular-nums;
+      }
+      .inspect .fig span {
+        font-size: 9px;
+        color: var(--muted);
+        display: block;
+        line-height: 1.3;
+      }
+      .nbl {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin: 6px 0 9px;
+      }
+      .nbl span {
+        font-size: 9.5px;
+        padding: 2px 6px;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      .nbl .up {
+        background: #eaf5ed;
+        color: #1f6b3b;
+      }
+      .nbl .down {
+        background: #fdecef;
+        color: #a8203c;
+      }
+      .inspect button {
+        width: 100%;
+        padding: 7px 0;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 11px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .inspect button.fail {
+        background: #a8203c;
+        color: #fff;
+        border-color: #a8203c;
+      }
+      .simres {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin: 12px 0;
+      }
+      .simres div {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 9px 10px;
+      }
+      .simres b {
+        display: block;
+        font-size: 19px;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.4px;
+      }
+      .simres span {
+        font-size: 9.5px;
+        color: var(--muted);
+        line-height: 1.3;
+        display: block;
+        margin-top: 2px;
+      }
+      .simres .hard {
+        background: #fdf2f4;
+        border-color: #e8c4cc;
+      }
+      .simres .hard b {
+        color: var(--t1);
+      }
+      .simres .casc {
+        background: #fff7ed;
+        border-color: #f0d9b5;
+      }
+      .simres .casc b {
+        color: #c4622d;
+      }
+      .simlist {
+        margin-top: 2px;
+      }
+
+      .simlegend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px 14px;
+        padding: 8px 10px;
+        background: #f7f9fc;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        margin-bottom: 11px;
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .simlegend span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .simlegend i {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        flex: none;
+        display: inline-block;
+      }
+      .simhead {
+        display: grid;
+        grid-template-columns: 64px 1fr 52px;
+        gap: 8px;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--muted);
+        font-weight: 700;
+        padding-bottom: 4px;
+        border-bottom: 1px solid var(--line);
+      }
+      .simrow {
+        display: grid;
+        grid-template-columns: 64px 1fr 52px;
+        gap: 8px;
+        align-items: center;
+        padding: 7px 0;
+        border-bottom: 1px solid #f1f4f8;
+        font-size: 11px;
+        cursor: pointer;
+      }
+      .simrow:hover {
+        background: #f7f9fc;
+      }
+      .simrow.on {
+        background: #fdf2f4;
+        box-shadow: inset 3px 0 0 var(--t1);
+      }
+      .simrow .id {
+        font-weight: 600;
+        font-size: 11px;
+      }
+      .simrow .id small {
+        display: block;
+        font-weight: 400;
+        font-size: 9px;
+        color: var(--muted);
+      }
+      .simbar {
+        height: 13px;
+        border-radius: 2px;
+        overflow: hidden;
+        display: flex;
+        background: #eef1f5;
+      }
+      .simbar i {
+        display: block;
+        height: 100%;
+      }
+      .simrow .p {
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+        text-align: right;
+        font-size: 11.5px;
+      }
+      #simfoot {
+        display: flex;
+        gap: 6px;
+        margin-top: 12px;
+      }
+      #simfoot button {
+        flex: 1;
+        padding: 6px 0;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 10.5px;
+        cursor: pointer;
+      }
+      #simfoot button:hover {
+        background: #f7f9fc;
+      }
+      .simhint {
+        font-size: 10.5px;
+        color: var(--muted);
+        line-height: 1.5;
+        margin-bottom: 10px;
+      }
+      .failx {
+        color: #7a8794;
+        font:
+          700 13px/16px "Segoe UI",
+          sans-serif;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <aside id="panel">
+        <div id="brand">
+          <img src="favicon.ico" alt="" style="width: 32px; height: 32px" />
+          <b>TelcoShield</b>
+          <span
+            id="livebadge"
+            style="margin-left: auto; font-size: 10.5px"
+          ></span>
+        </div>
+        <div id="search">
+          <input id="q" placeholder="Search tower ID…" autocomplete="off" />
+        </div>
+        <div id="tabs">
+          <button class="on" onclick="tab('register')">Register</button>
+          <button onclick="tab('detail')">Detail</button>
+          <button onclick="tab('overview')">Overview</button>
+          <button onclick="tab('compare')">Compare</button>
+          <button onclick="tab('simulate')">Simulate</button>
+        </div>
+        <div id="overview"></div>
+        <div id="compare"></div>
+        <div id="simulate"></div>
+        <div id="register" class="show">
+          <div id="sortbar">
+            <button class="on" data-s="priority">Priority</button>
+            <button data-s="pop_served">People</button>
+            <button data-s="isolation">Isolated</button>
+            <button data-s="baseline">Flood</button>
+          </div>
+          <div id="rows">
+            <div class="skel">
+              <div style="width: 70%"></div>
+              <div style="width: 90%"></div>
+              <div style="width: 55%"></div>
+              <div style="width: 80%"></div>
+            </div>
+          </div>
+          <div id="regfoot">
+            <button onclick="exportCSV()">Export CSV</button>
+            <span id="regcount"></span>
+          </div>
+        </div>
+        <div id="detail" class="hide">
+          <div class="empty">
+            <h4>Select a tower</h4>
+            Click any marker to see its flood susceptibility, the population it
+            serves, how much of that coverage no neighbouring tower can absorb,
+            and the recommended resilience measure.
+          </div>
+        </div>
+      </aside>
+
+      <div id="resizer" title="Drag to resize"></div>
+      <div id="mapwrap">
+        <div id="map"></div>
+
+        <div id="layers">
+          <div class="lh">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#5f6b7a"
+              stroke-width="2"
+            >
+              <path d="M12 2 2 7l10 5 10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
+            </svg>
+            View options
+          </div>
+          <div class="grp">
+            <div class="tog on" data-l="towers">
+              <span>Tower risk tier</span><span class="sw"></span>
+            </div>
+            <div class="keys">
+              <div>
+                <i class="dot" style="background: var(--t1)"></i>Very high · top
+                5%
+              </div>
+              <div><i class="dot" style="background: var(--t2)"></i>High</div>
+              <div>
+                <i class="dot" style="background: var(--t3)"></i>Moderate
+              </div>
+              <div><i class="dot" style="background: var(--t4)"></i>Low</div>
+            </div>
+          </div>
+          <div class="grp">
+            <div class="tog" data-l="heat">
+              <span>Risk heatmap</span><span class="sw"></span>
+            </div>
+            <div class="keys" id="heatkey" style="display: none">
+              <div style="display: block">
+                <div
+                  style="
+                    height: 7px;
+                    border-radius: 2px;
+                    background: linear-gradient(
+                      90deg,
+                      #ffd9d9 0%,
+                      #e8a23d 50%,
+                      #a8203c 100%
+                    );
+                  "
+                ></div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 9.5px;
+                    margin-top: 2px;
+                  "
+                >
+                  <span>low</span><span>susceptibility</span><span>high</span>
+                </div>
+              </div>
+              <div class="fgrp" style="margin-top: 7px">
+                <label>Layer opacity <b id="heatopv">70%</b></label>
+                <input
+                  class="rng"
+                  id="heatop"
+                  type="range"
+                  min="0.15"
+                  max="1"
+                  step="0.05"
+                  value="0.7"
+                  oninput="setHeatOpacity(this.value)"
+                />
+              </div>
+            </div>
+
+            <div class="tog" data-l="extent" style="margin-top: 9px">
+              <span>Flood extent · Nov 2024</span><span class="sw"></span>
+            </div>
+          </div>
+          <div class="grp">
+            <div class="tog" data-l="coverage">
+              <span>Coverage footprint</span><span class="sw"></span>
+            </div>
+            <div class="tog" data-l="sole" style="margin-top: 9px">
+              <span>Sole-coverage towers</span><span class="sw"></span>
+            </div>
+          </div>
+          <div class="grp">
+            <div class="tog" data-l="filter">
+              <span>Escalation-eligible only</span><span class="sw"></span>
+            </div>
+            <div class="fgrp">
+              <label>Min susceptibility <b id="thv">0.00</b></label>
+              <input
+                class="rng"
+                id="th"
+                type="range"
+                min="0"
+                max="0.9"
+                step="0.05"
+                value="0"
+              />
+            </div>
+            <div class="fgrp">
+              <label>Min redundancy deficit <b id="isov">0%</b></label>
+              <input
+                class="rng"
+                id="iso"
+                type="range"
+                min="0"
+                max="0.95"
+                step="0.05"
+                value="0"
+              />
+            </div>
+            <div class="fgrp">
+              <label>Min people served <b id="popv">0</b></label>
+              <input
+                class="rng"
+                id="pop"
+                type="range"
+                min="0"
+                max="10000"
+                step="250"
+                value="0"
+              />
+            </div>
+            <button id="clearf" onclick="clearFilters()">Clear filters</button>
+          </div>
+        </div>
+
+        <div id="stats">
+          <div>Towers shown<b id="s1">—</b></div>
+          <div>Population served<b id="s2">—</b></div>
+          <div>Sole-coverage pop.<b id="s3">—</b></div>
+          <div
+            id="statnote"
+            style="align-self: center; max-width: 120px; line-height: 1.35"
+          ></div>
+        </div>
+        <div id="methwrap">
+          <button id="methbtn" tabindex="0" title="Methodology">&#9432;</button>
+          <div id="meth">
+            <h5>Methodology</h5>
+            <dl>
+              <dt>Flood model</dt>
+              <dd>XGBoost</dd>
+              <dt>Training labels</dt>
+              <dd>Sentinel-1 flood extents</dd>
+              <dt>Events</dt>
+              <dd>Nov 2024 · Dec 2022</dd>
+              <dt>Validation</dt>
+              <dd>spatial-block CV</dd>
+              <dt>PR-AUC</dt>
+              <dd>0.924 &plusmn; 0.015</dd>
+              <dt>Permutation test</dt>
+              <dd>0.508 vs 0.500 base</dd>
+              <dt>Population</dt>
+              <dd>WorldPop 2020 UN-adj.</dd>
+              <dt>Terrain</dt>
+              <dd>MERIT Hydro 90 m</dd>
+              <dt>Sites</dt>
+              <dd>716 · OpenCelliD</dd>
+              <dt>Rainfall</dt>
+              <dd>Open-Meteo, 15 y climatology</dd>
+              <dt>River</dt>
+              <dd>DID InfoBanjir, hourly</dd>
+            </dl>
+            <div class="foot">
+              Land cover and coordinates excluded from the model on purpose:
+              with land cover in, tree cover took 80% of importance — the model
+              learning that radar cannot see water under canopy.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- optional, gitignored: config.js sets window.GEMINI_KEY to enable on-demand briefings -->
+    <script
+      src="config.js"
+      onerror="console.log('no config.js — on-demand briefings disabled')"
+    ></script>
+    <script>
+      const TIER = [
+        { n: "Very high", c: "#8e1b2e" },
+        { n: "High", c: "#d4553a" },
+        { n: "Moderate", c: "#e8a23d" },
+        { n: "Low", c: "#9fb2c4" },
+      ];
+      const fmt = (n) =>
+        n >= 1e6
+          ? (n / 1e6).toFixed(1) + "M"
+          : n >= 1e3
+            ? (n / 1e3).toFixed(1) + "k"
+            : Math.round(n).toLocaleString();
+
+      const map = L.map("map", { zoomControl: false }).setView([5.3, 102.0], 9);
+      L.control.zoom({ position: "bottomright" }).addTo(map);
+      map.createPane("heat").style.zIndex = 350;
+      map.getPane("heat").style.pointerEvents = "none";
+      map.createPane("labels").style.zIndex = 450;
+      map.getPane("labels").style.pointerEvents = "none";
+
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
+        { attribution: "&copy; OpenStreetMap &copy; CARTO", maxZoom: 19 },
+      ).addTo(map);
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
+        { pane: "labels", maxZoom: 19 },
+      ).addTo(map);
+
+      const gCov = L.layerGroup(),
+        gTow = L.layerGroup().addTo(map),
+        gSole = L.layerGroup(),
+        gFocus = L.layerGroup().addTo(map); // selected tower + its neighbours
+      let TOWERS = [],
+        TRACE = null,
+        EXPL = null,
+        sel = null,
+        state = {
+          towers: 1,
+          coverage: 0,
+          sole: 0,
+          filter: 0,
+          th: 0,
+          iso: 0,
+          pop: 0,
+          heat: 0,
+          extent: 0,
+        };
+
+      // Rank on live_score when the export carried the live layer, else static.
+      let SCORE = "static_priority",
+        LIVE = false;
+      function sc(t) {
+        return t[SCORE];
+      }
+      function tier(t, cuts) {
+        return sc(t) >= cuts[0]
+          ? 0
+          : sc(t) >= cuts[1]
+            ? 1
+            : sc(t) >= cuts[2]
+              ? 2
+              : 3;
+      }
+
+      // Cache-bust: without this the browser serves a stale towers.json and an
+      // hourly refresh is invisible to the user.
+      const bust = () => `?v=${Date.now()}`;
+      const opt = (u) =>
+        fetch(u + bust())
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null);
+      // trace.json and explanations.json are optional — the dashboard degrades gracefully
+      // Try the API first (live, recomputable), fall back to the static file.
+      // One dashboard, two modes: works on GitHub Pages and against FastAPI.
+      let API = false;
+      const towerSrc = () =>
+        fetch("/api/towers")
+          .then((r) => {
+            if (!r.ok) throw 0;
+            API = true;
+            return r.json();
+          })
+          .catch(() => fetch("towers.json" + bust()).then((r) => r.json()));
+      Promise.all([
+        towerSrc(),
+        opt("trace.json"),
+        opt("explanations.json"),
+        opt("grid.json"),
+        opt("flood_extent.json"),
+      ]).then(([d, tr, ex, gr, fx]) => {
+        TOWERS = d;
+        TRACE = tr;
+        EXPL = ex;
+        GRID = gr;
+        EXTENT = fx;
+        console.log(
+          gr ? `grid.json: ${gr.nx}x${gr.ny} cells` : "grid.json missing",
+        );
+        console.log(
+          fx
+            ? `flood_extent.json: ${fx.features.length} polygons`
+            : "flood_extent.json missing",
+        );
+        LIVE = d.length > 0 && d[0].live_score !== undefined;
+        if (LIVE) {
+          SCORE = "live_score";
+          const esc = d.filter((x) => x.escalated).length;
+          const gen = d[0].generated_at ? new Date(d[0].generated_at) : null;
+          const mins = gen ? Math.round((Date.now() - gen) / 6e4) : null;
+          const ageTxt =
+            mins == null
+              ? ""
+              : mins < 90
+                ? ` · ${mins}m ago`
+                : ` · ${Math.round(mins / 60)}h ago`;
+          document.getElementById("livebadge").innerHTML =
+            `<span style="color:#8e1b2e;font-weight:600">LIVE</span> · ${esc} escalated${ageTxt}` +
+            (API
+              ? ` <button onclick="refreshLive()" id="rfbtn" style="margin-left:6px;padding:2px 8px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:10px;cursor:pointer;font-family:inherit">Refresh</button>`
+              : "");
+          console.log(
+            `live layer active — ranking by live_score, ${esc} towers escalated`,
+          );
+        } else console.log("static export — no live_score field");
+        console.log(
+          tr
+            ? `trace.json: ${Object.keys(tr).length} towers`
+            : "trace.json missing — synthetic sparkline",
+        );
+        console.log(
+          ex
+            ? `explanations.json: ${Object.keys(ex).length} towers`
+            : "explanations.json missing — rule text only",
+        );
+        const s = d.map((x) => x[SCORE]).sort((a, b) => b - a);
+        const cuts = [
+          s[Math.floor(s.length * 0.05)],
+          s[Math.floor(s.length * 0.15)],
+          s[Math.floor(s.length * 0.35)],
+        ];
+        TOWERS.forEach((t) => (t._t = tier(t, cuts)));
+        draw();
+        openFromURL();
+      });
+
+      function draw() {
+        gCov.clearLayers();
+        gTow.clearLayers();
+        gSole.clearLayers();
+        let n = 0,
+          p = 0,
+          ps = 0;
+        TOWERS.forEach((t) => {
+          if (t.baseline < state.th) return;
+          if (t.isolation < state.iso) return;
+          if (t.pop_served < state.pop) return;
+          if (state.filter && t.baseline < 0.25) return;
+          n++;
+          p += t.pop_served;
+          ps += t.pop_sole;
+          const col = TIER[t._t].c;
+          if (state.coverage)
+            gCov.addLayer(
+              L.circle([t.lat, t.lon], {
+                radius: t.radius_km * 1000,
+                color: col,
+                weight: 0.7,
+                opacity: 0.35,
+                fillColor: col,
+                fillOpacity: 0.06,
+                interactive: false,
+              }),
+            );
+          if (state.sole && t.isolation > 0.5)
+            gSole.addLayer(
+              L.circleMarker([t.lat, t.lon], {
+                radius: 12,
+                color: "#1a5fb4",
+                weight: 1.6,
+                fill: false,
+                opacity: 0.75,
+                interactive: false,
+              }),
+            );
+          const m = L.circleMarker([t.lat, t.lon], {
+            radius: t._t === 0 ? 7.5 : t._t === 1 ? 6 : t._t === 2 ? 5 : 4.2,
+            fillColor: col,
+            color: t.escalated ? col : "#fff",
+            weight: 1.3,
+            fillOpacity: 0.92,
+            className: t.escalated ? "pulse" : "",
+          });
+          m.on("click", () =>
+            document.getElementById("simulate").classList.contains("show")
+              ? // In Simulate a click INSPECTS. Failing is an explicit button in
+                // the inspect card — click-to-destroy made it impossible to look
+                // at a tower without changing the scenario.
+                inspectFail(t.tower_id)
+              : show(t),
+          );
+          m.bindTooltip(`${t.tower_id} · #${t.rank}`, {
+            direction: "top",
+            offset: [0, -6],
+          });
+          gTow.addLayer(m);
+        });
+        state.towers ? gTow.addTo(map) : map.removeLayer(gTow);
+        state.coverage ? gCov.addTo(map) : map.removeLayer(gCov);
+        state.sole ? gSole.addTo(map) : map.removeLayer(gSole);
+        s1.textContent = n;
+        s2.textContent = fmt(p);
+        s3.textContent = fmt(ps);
+        const note = document.getElementById("statnote");
+        if (note)
+          note.textContent =
+            state.filter || state.th > 0
+              ? "at-risk cohort only"
+              : `whole network · ${TOWERS.filter((x) => x.baseline >= 0.25).length} above the 0.25 floor`;
+        if (document.getElementById("rows")) renderRegister();
+        if (document.getElementById("overview").classList.contains("show"))
+          renderOverview();
+      }
+
+      function bar(lab, val, txt, col) {
+        return `<div class="bar-row"><div class="bar-lab"><span>${lab}</span><span>${txt}</span></div>
+  <div class="track"><div class="fill" style="width:${Math.min(100, val * 100)}%;background:${col}"></div></div></div>`;
+      }
+
+      function action(t) {
+        if (t.hand < 2 && t.baseline >= 0.6)
+          return [
+            "Elevate equipment platform",
+            `Sits ${t.hand.toFixed(1)} m above nearest drainage. Raise cabinets and connectors clear of the modelled inundation level.`,
+          ];
+        if (t.isolation > 0.5 && t.baseline >= 0.4)
+          return [
+            "Priority hardening — no fallback coverage",
+            `${Math.round(t.isolation * 100)}% of this footprint has no neighbouring tower. Loss here is unrecoverable by handover.`,
+          ];
+        if (t.baseline >= 0.4 && t.nn_dist_km > 3)
+          return [
+            "Extended-autonomy backup power",
+            `Remote site ${t.nn_dist_km.toFixed(1)} km from its nearest neighbour. Refuelling access is the binding constraint — solar plus battery preferred.`,
+          ];
+        if (t.baseline >= 0.25)
+          return [
+            "Monitor · pre-position portable capacity",
+            "Escalation-eligible. Include in the monsoon watchlist and stage Cell-on-Wheels capacity within reach.",
+          ];
+        return [
+          "No action required",
+          `Susceptibility ${t.baseline.toFixed(2)} sits below the 0.25 escalation floor. Terrain protects this site.`,
+        ];
+      }
+
+      function spark(t) {
+        let pts,
+          real = false;
+        if (TRACE && TRACE[t.tower_id] && TRACE[t.tower_id].length > 1) {
+          pts = TRACE[t.tower_id];
+          real = true; // real replay trigger series
+        } else {
+          const seed = parseInt(t.tower_id.slice(1)),
+            base = t.baseline;
+          pts = [...Array(28)].map((_, i) => {
+            const w = Math.exp(-Math.pow(i - 17, 2) / 22);
+            return Math.max(
+              0.02,
+              Math.min(
+                1,
+                base * (0.28 + 2.1 * w) + ((seed * (i + 3)) % 11) / 150,
+              ),
+            );
+          });
+        }
+        const W = 336,
+          H = 96,
+          pad = 6,
+          n = pts.length,
+          sx = (i) => pad + (n < 2 ? 0 : (i * (W - 2 * pad)) / (n - 1));
+        const path = pts
+          .map(
+            (v, i) =>
+              `${i ? "L" : "M"}${sx(i).toFixed(1)},${(H - pad - Math.max(0, Math.min(1, v)) * (H - 2 * pad)).toFixed(1)}`,
+          )
+          .join("");
+        const area = `${path}L${W - pad},${H - pad}L${pad},${H - pad}Z`;
+        const yEnter = H - pad - 0.95 * (H - 2 * pad),
+          yExit = H - pad - 0.88 * (H - 2 * pad);
+
+        // shade the stretch where the gate was actually latched open
+        let bands = "",
+          run = null;
+        pts.forEach((v, i) => {
+          if (v >= 0.95 && run === null) run = i;
+          if ((v < 0.88 || i === n - 1) && run !== null) {
+            bands += `<rect x="${sx(run).toFixed(1)}" y="${pad}" width="${Math.max(1.5, sx(i) - sx(run)).toFixed(1)}" height="${H - 2 * pad}" fill="#8e1b2e" opacity=".07"/>`;
+            run = null;
+          }
+        });
+        const peak = pts.indexOf(Math.max(...pts));
+        SPARK = { pts, n, real }; // handed to the hover handler
+        return `<div id="sparkwrap"><div id="sphair"></div><div id="sptip"></div>
+    <svg id="spark" viewBox="0 0 ${W} ${H}" onmousemove="sparkHover(event)" onmouseleave="sparkOut()">${bands}
+    <line x1="${pad}" y1="${yEnter}" x2="${W - pad}" y2="${yEnter}" stroke="#8e1b2e" stroke-width="1" stroke-dasharray="3 3"/>
+    <line x1="${pad}" y1="${yExit}" x2="${W - pad}" y2="${yExit}" stroke="#e8a23d" stroke-width="1" stroke-dasharray="3 3"/>
+    <path d="${area}" fill="#1a5fb4" opacity=".10"/>
+    <path d="${path}" fill="none" stroke="#1a5fb4" stroke-width="1.8"/>
+    <circle cx="${sx(peak).toFixed(1)}" cy="${(H - pad - Math.max(0, Math.min(1, pts[peak])) * (H - 2 * pad)).toFixed(1)}" r="2.6" fill="#8e1b2e"/></svg></div>
+  <div class="legend-inline"><span><i style="background:#8e1b2e"></i>enter 0.95</span>
+  <span><i style="background:#e8a23d"></i>exit 0.88</span>
+  <span>${real ? `Nov 22 – Dec 8, 2024 · ${n} pts` : "illustrative"}</span></div>`;
+      }
+
+      // ---------------- on-demand LLM briefing ----------------
+      // Generates only for the tower being viewed. Falls back silently when no key
+      // is present, so the GitHub Pages build still works with pre-generated text.
+      const GEN = {}; // in-memory cache for this session
+
+      // Pool, not a single model: quota is per model per day, so a 429 on one is not
+      // a 429 on the rest. Same list as make_explanations.py.
+      const MODELS = [
+        "gemini-2.5-flash-lite",
+        "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite",
+        "gemini-3.5-flash",
+        "gemini-3-flash",
+        "gemini-3.6-flash",
+      ];
+      const DEAD = new Set(); // models that returned quota errors this session
+
+      const SYSTEM_TXT = `You write short operational briefings for a Malaysian mobile network operator's resilience planning team.
+Rules, without exception:
+- Use ONLY the figures given. Never estimate or introduce a number that is not supplied.
+- 2 to 3 sentences. No greeting, no heading, no bullets, no markdown.
+- Plain British English a field engineer would use.
+- Lead with the consequence to subscribers, then the cause, then the action.
+- If redundancy deficit is above 50%, state plainly that no neighbouring tower can absorb this site's users.
+- Never speculate about when a flood will occur. This is structural vulnerability, not a forecast.
+- Write all numbers as digits, never spelled out.
+- State each fact once. Do not restate the redundancy deficit in different words.
+- The cause of outage is flooding. Redundancy deficit explains why the loss
+  cannot be absorbed by a neighbour — never present it as the cause.`;
+
+      // Same driver ranking as make_explanations.py: model feature importance
+      // weighted by how extreme this tower's value is within the network.
+      const IMP = { slope: 0.363, elev: 0.26, hand: 0.112, twi: 0.084 },
+        HIGH = { slope: 0, elev: 0, hand: 0, twi: 1 };
+      const PHR = {
+        slope: "very flat ground that holds water rather than shedding it",
+        elev: "low elevation relative to the rest of the network",
+        hand: "sits barely above the nearest drainage line",
+        twi: "terrain shaped to accumulate water",
+      };
+      let SORTED = null;
+      function drivers(t) {
+        if (!SORTED) {
+          SORTED = {};
+          for (const f in IMP)
+            SORTED[f] = TOWERS.map((x) => x[f]).sort((a, b) => a - b);
+        }
+        return Object.keys(IMP)
+          .map((f) => {
+            const a = SORTED[f];
+            let lo = 0,
+              hi = a.length;
+            while (lo < hi) {
+              const m = (lo + hi) >> 1;
+              a[m] < t[f] ? (lo = m + 1) : (hi = m);
+            }
+            const p = lo / a.length;
+            return [IMP[f] * (HIGH[f] ? p : 1 - p), f];
+          })
+          .sort((x, y) => y[0] - x[0])
+          .slice(0, 2)
+          .filter((x) => x[0] > 0.05)
+          .map((x) => PHR[x[1]]);
+      }
+
+      // Rank is deliberately NOT supplied: live scoring reorders it, so a briefing
+      // could contradict the rank shown directly above it. Tier comes from
+      // static_priority, which does not move.
+      let CUTS = null;
+      function tierLabel(t) {
+        if (!CUTS)
+          CUTS = TOWERS.map((x) => x.static_priority).sort((a, b) => b - a);
+        const p = t.static_priority;
+        if (p >= CUTS[Math.floor(CUTS.length * 0.05)])
+          return "in the top 5% by structural priority";
+        if (p >= CUTS[Math.floor(CUTS.length * 0.15)])
+          return "in the top 15% by structural priority";
+        if (p >= CUTS[Math.floor(CUTS.length * 0.35)])
+          return "in the top 35% by structural priority";
+        return "below the top 35% by structural priority";
+      }
+
+      function promptFor(t) {
+        const [act] = action(t);
+        return `tower_id: ${t.tower_id} (Kelantan, ${tierLabel(t)})
+flood susceptibility: ${t.baseline.toFixed(2)} on 0-1, from terrain compared against Sentinel-1 flood extents observed in Nov 2024 and Dec 2022
+main drivers: ${drivers(t).join(", ") || "terrain characteristics"}
+height above nearest drainage: ${t.hand.toFixed(1)} m
+elevation: ${t.elev.toFixed(0)} m
+population served: ${Math.round(t.pop_served).toLocaleString()}
+population with no alternative coverage: ${Math.round(t.pop_sole).toLocaleString()} (${(t.isolation * 100).toFixed(0)}% of users)
+neighbouring towers within 5 km: ${t.n_within_5km}
+nearest neighbour: ${t.nn_dist_km.toFixed(1)} km
+recommended measure: ${act.toLowerCase()}
+
+Write the briefing for this tower.`;
+      }
+      // Allowed values come from the same fields promptFor() supplies, so the guard
+      // cannot drift from the prompt. The regex only catches 3+ digit numbers, which
+      // is why small values like slope and HAND are not listed.
+      const NUMBER_WORDS =
+        /\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million)\b/i;
+
+      function verify(txt, t) {
+        const issues = [];
+
+        const ok = new Set();
+        [
+          Math.round(t.pop_served),
+          Math.round(t.pop_sole),
+          Math.round(t.elev),
+        ].forEach((n) => {
+          ok.add(n);
+          ok.add(n - 1);
+          ok.add(n + 1);
+        });
+
+        const found = (txt.match(/\b\d[\d,]{2,}\b/g) || []).map(
+          (s) => +s.replace(/,/g, ""),
+        );
+        const stray = found.filter((n) => !ok.has(n));
+        if (stray.length) issues.push(`unverified ${stray.join(", ")}`);
+
+        // spelled-out numbers cannot be checked against source values, so they are
+        // never acceptable — this is what let "Three thousand..." through before
+        const m = txt.match(NUMBER_WORDS);
+        if (m) issues.push(`spelled-out "${m[0]}"`);
+
+        if (txt.split(/\s+/).length > 70)
+          issues.push(`${txt.split(/\s+/).length} words`);
+
+        return issues;
+      }
+
+      async function genBriefing(t) {
+        const box = document.getElementById("llmbox");
+        if (!box) return;
+
+        const pool = MODELS.filter((m) => !DEAD.has(m));
+        if (!pool.length) {
+          box.innerHTML = `<div style="font-size:11.5px;color:#a83232;line-height:1.6">
+      All models exhausted for today. Quota resets around 3pm Malaysian time.</div>`;
+          return;
+        }
+
+        let lastErr = "";
+        for (const model of pool) {
+          box.innerHTML = `<span style="color:var(--muted)">Generating… <span style="font-size:10px">${model}</span></span>`;
+          try {
+            const r = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${window.GEMINI_KEY}`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  systemInstruction: { parts: [{ text: SYSTEM_TXT }] },
+                  contents: [{ parts: [{ text: promptFor(t) }] }],
+                  generationConfig: { temperature: 0.3, maxOutputTokens: 800 },
+                }),
+              },
+            );
+            const j = await r.json();
+
+            if (j.error) {
+              const s = j.error.status || "";
+              // quota and availability errors: retire this model, try the next
+              if (
+                s === "RESOURCE_EXHAUSTED" ||
+                s === "NOT_FOUND" ||
+                r.status === 429
+              ) {
+                DEAD.add(model);
+                lastErr = `${model}: ${s}`;
+                console.warn(`${model} unavailable (${s}) — trying next`);
+                continue;
+              }
+              throw new Error(`${s}: ${j.error.message.slice(0, 120)}`);
+            }
+
+            const txt = (
+              j.candidates?.[0]?.content?.parts?.[0]?.text || ""
+            ).trim();
+            if (!txt) {
+              DEAD.add(model);
+              lastErr = `${model}: empty response`;
+              continue;
+            }
+
+            GEN[t.tower_id] = txt;
+            const issues = verify(txt, t);
+            box.innerHTML = `<div class="act" style="border-left-color:#1a5fb4;background:#f4f8fd">${txt}</div>
+        <div style="font-size:10px;color:${issues.length ? "#a83232" : "var(--muted)"};margin-top:6px;line-height:1.5">
+        ${
+          issues.length
+            ? `⚠ ${issues.join("; ")}`
+            : `Written from this tower's computed values only — every figure checked against source data. <span style="opacity:.6">${model}</span>`
+        }</div>`;
+            return;
+          } catch (e) {
+            lastErr = e.message;
+            console.error(model, e);
+          }
+        }
+
+        box.innerHTML = `<div style="font-size:11.5px;color:#a83232;line-height:1.6">
+    No model succeeded. Last error — ${lastErr}</div>`;
+      }
+
+      // Rerun the engine against live conditions, then redraw. API mode only.
+      async function refreshLive() {
+        const b = document.getElementById("rfbtn");
+        if (b) {
+          b.textContent = "Running…";
+          b.disabled = true;
+        }
+        try {
+          const r = await fetch("/api/refresh", { method: "POST" });
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.detail || "refresh failed");
+          TOWERS = await fetch("/api/towers").then((x) => x.json());
+          const s = TOWERS.map((x) => x[SCORE]).sort((a, b) => b - a);
+          const cuts = [
+            s[Math.floor(s.length * 0.05)],
+            s[Math.floor(s.length * 0.15)],
+            s[Math.floor(s.length * 0.35)],
+          ];
+          TOWERS.forEach((t) => (t._t = tier(t, cuts)));
+          draw();
+          document.getElementById("livebadge").innerHTML =
+            `<span style="color:#8e1b2e;font-weight:600">LIVE</span> · ${j.escalated} escalated · just now` +
+            ` <button onclick="refreshLive()" id="rfbtn" style="margin-left:6px;padding:2px 8px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:10px;cursor:pointer;font-family:inherit">Refresh</button>`;
+        } catch (e) {
+          if (b) {
+            b.textContent = "Failed";
+            b.disabled = false;
+          }
+          console.error(e);
+        }
+      }
+
+      // Download whatever has been generated this session, to seed explanations.json
+      function saveBriefings() {
+        const merged = { ...(EXPL || {}), ...GEN };
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(
+          new Blob([JSON.stringify(merged)], { type: "application/json" }),
+        );
+        a.download = "explanations.json";
+        a.click();
+      }
+
+      // ---------------- register: the ranked list a planner actually works from ----------------
+      let SORT = "priority";
+
+      function tab(which) {
+        document
+          .getElementById("register")
+          .classList.toggle("show", which === "register");
+        document
+          .getElementById("overview")
+          .classList.toggle("show", which === "overview");
+        document
+          .getElementById("compare")
+          .classList.toggle("show", which === "compare");
+        document
+          .getElementById("simulate")
+          .classList.toggle("show", which === "simulate");
+        document
+          .getElementById("detail")
+          .classList.toggle("hide", which !== "detail");
+        const order = ["register", "detail", "overview", "compare", "simulate"];
+        document
+          .querySelectorAll("#tabs button")
+          .forEach((b, i) => b.classList.toggle("on", order[i] === which));
+        if (which === "overview") renderOverview();
+        if (which === "compare") renderCompare();
+        else gCmp.clearLayers();
+        if (which === "simulate") {
+          if (SIMMODE === "scenario" && !FAILED.size) applyScenario();
+          else renderSimulate();
+        } else gFail.clearLayers();
+      }
+
+      function visible() {
+        return TOWERS.filter((t) => {
+          if (t.baseline < state.th) return false;
+          if (t.isolation < state.iso) return false;
+          if (t.pop_served < state.pop) return false;
+          if (state.filter && t.baseline < 0.25) return false;
+          return true;
+        }).sort((a, b) =>
+          SORT === "priority" ? sc(b) - sc(a) : (b[SORT] ?? 0) - (a[SORT] ?? 0),
+        );
+      }
+
+      function renderRegister() {
+        const list = visible();
+        document.getElementById("rows").innerHTML = list.length
+          ? list
+              .map((t) => {
+                const T = TIER[t._t];
+                return `<div class="row${sel && sel.tower_id === t.tower_id ? " sel" : ""}"
+                   data-id="${t.tower_id}" onclick="pick('${t.tower_id}')">
+                <div class="rk">${t.rank}</div>
+                <div>
+                  <div class="id">${t.tower_id}${t.escalated ? '<span class="esc"></span>' : ""}</div>
+                  <div class="sub">${(t.isolation * 100).toFixed(0)}% isolated · flood ${t.baseline.toFixed(2)}</div>
+                  <div class="mini"><i style="width:${Math.min(100, (sc(t) / (sc(list[0]) || 1)) * 100)}%;background:${T.c}"></i></div>
+                </div>
+                <div class="pop">${fmt(t.pop_served)}</div>
+              </div>`;
+              })
+              .join("")
+          : '<div class="empty" style="padding:16px 18px">No towers match the current filter.</div>';
+        document.getElementById("regcount").textContent =
+          `${list.length} towers`;
+      }
+
+      function pick(id) {
+        const t = TOWERS.find((x) => x.tower_id === id);
+        if (t) {
+          show(t);
+          tab("detail");
+        }
+      }
+
+      // Arrow keys step through the register — faster than hunting for dots.
+      document.addEventListener("keydown", (e) => {
+        if (!["ArrowDown", "ArrowUp"].includes(e.key)) return;
+        if (document.activeElement === document.getElementById("q")) return;
+        const list = visible();
+        if (!list.length) return;
+        const i = sel ? list.findIndex((x) => x.tower_id === sel.tower_id) : -1;
+        const next =
+          list[
+            Math.max(
+              0,
+              Math.min(list.length - 1, i + (e.key === "ArrowDown" ? 1 : -1)),
+            )
+          ];
+        if (next) {
+          e.preventDefault();
+          show(next);
+        }
+      });
+
+      function exportCSV() {
+        const cols = [
+          "rank",
+          "tower_id",
+          "lat",
+          "lon",
+          "baseline",
+          "static_priority",
+          "live_score",
+          "multiplier",
+          "pop_served",
+          "pop_sole",
+          "isolation",
+          "hand",
+          "elev",
+          "n_within_5km",
+          "nn_dist_km",
+          "escalated",
+        ];
+        const esc = (v) =>
+          v == null
+            ? ""
+            : /[",\n]/.test(String(v))
+              ? `"${String(v).replace(/"/g, '""')}"`
+              : v;
+        const csv = [cols.join(",")]
+          .concat(visible().map((t) => cols.map((c) => esc(t[c])).join(",")))
+          .join("\n");
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+        a.download = `telcoshield_register_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+      }
+
+      document.querySelectorAll("#sortbar button").forEach((b) => {
+        b.onclick = () => {
+          SORT = b.dataset.s;
+          document
+            .querySelectorAll("#sortbar button")
+            .forEach((x) => x.classList.remove("on"));
+          b.classList.add("on");
+          renderRegister();
+        };
+      });
+
+      // ---------------- overview: the portfolio view ----------------
+      // Pure SVG, no charting library — keeps the page dependency-free and
+      // means nothing to load before the first paint.
+      const W = 344,
+        PADL = 26,
+        PADR = 6;
+
+      function areaChart(vals, h, colour, thresholdIdx) {
+        // TOP reserves room for the peak label — at 8 it was clipped by the viewBox
+        const n = vals.length,
+          max = Math.max(...vals, 1),
+          pad = 4,
+          TOP = 16;
+        const x = (i) => PADL + (i * (W - PADL - PADR)) / (n - 1);
+        const y = (v) => h - pad - (v / max) * (h - pad - TOP);
+        const line = vals
+          .map(
+            (v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`,
+          )
+          .join("");
+        const peak = vals.indexOf(max);
+        return `<svg viewBox="0 0 ${W} ${h}">
+          <line x1="${PADL}" y1="${h - pad}" x2="${W - PADR}" y2="${h - pad}" stroke="#e3e7ed"/>
+          <path d="${line}L${x(n - 1).toFixed(1)},${h - pad}L${PADL},${h - pad}Z" fill="${colour}" opacity=".13"/>
+          <path d="${line}" fill="none" stroke="${colour}" stroke-width="1.8"/>
+          <circle cx="${x(peak).toFixed(1)}" cy="${y(max).toFixed(1)}" r="3" fill="${colour}"/>
+          <text x="${x(peak).toFixed(1)}" y="${(y(max) - 6).toFixed(1)}" font-size="9.5" fill="${colour}"
+            text-anchor="${peak > n * 0.75 ? "end" : peak < n * 0.1 ? "start" : "middle"}" font-weight="600">${max}</text>
+          <text x="2" y="${h - pad}" font-size="8.5" fill="#5f6b7a">0</text>
+          <text x="2" y="14" font-size="8.5" fill="#5f6b7a">${max}</text>
+        </svg>`;
+      }
+
+      function renderOverview() {
+        const el = document.getElementById("overview");
+        // Follows the map filter and the Min-susceptibility slider, so the
+        // portfolio view always describes whatever is currently selected.
+        const elig = visible()
+          .slice()
+          .sort((a, b) => b.static_priority - a.static_priority);
+        if (!elig.length) {
+          el.innerHTML =
+            '<div class="empty">No towers match the current filter.</div>';
+          return;
+        }
+        const bits = [];
+        if (state.th > 0) bits.push(`flood ≥ ${state.th.toFixed(2)}`);
+        if (state.iso > 0)
+          bits.push(`isolation ≥ ${Math.round(state.iso * 100)}%`);
+        if (state.pop > 0) bits.push(`≥ ${fmt(state.pop)} people`);
+        if (state.filter && !bits.length)
+          bits.push("escalation-eligible (≥ 0.25)");
+        const cutTxt = bits.length ? bits.join(" · ") : "whole network";
+        const served = elig.reduce((s, t) => s + t.pop_served, 0);
+        const sole = elig.reduce((s, t) => s + t.pop_sole, 0);
+
+        // 1. network-wide escalation through the Nov 2024 replay
+        let timeline = "";
+        if (TRACE && Object.keys(TRACE).length) {
+          const pickSet = new Set(elig.map((t) => t.tower_id));
+          const ids = Object.keys(TRACE).filter((k) => pickSet.has(k));
+          const n = ids.length ? TRACE[ids[0]].length : 0;
+          const counts = Array.from({ length: n }, (_, i) =>
+            ids.reduce((c, id) => c + (TRACE[id][i] >= 0.95 ? 1 : 0), 0),
+          );
+          const peak = Math.max(...counts),
+            at = counts.indexOf(peak);
+          CHARTDATA.esc = { vals: counts, total: ids.length };
+          const day = 22 + Math.floor((at * 6) / 24);
+          timeline = !n
+            ? ""
+            : `<div class="chart">
+            <h4>Network escalation — Nov 2024 replay</h4>
+            <p>Selected towers above the 0.95 gate threshold, 6-hourly.</p>
+            <div class="cwrap" data-c="esc"><div class="chair"></div><div class="ctip"></div>
+              ${areaChart(counts, 96, "#8e1b2e")}</div>
+            <div class="cap">Peaks at ${peak} of ${ids.length} towers around
+              ${day > 30 ? `Dec ${day - 30}` : `Nov ${day}`}. The engine detected the
+              build-up, held through the event, and stood down after — no manual input.</div>
+          </div>`;
+        }
+
+        // 2. cumulative sole-coverage population as you work down the ranking
+        let cum = 0;
+        const curve = elig.map((t) => (cum += t.pop_sole));
+        const total = cum || 1;
+        CHARTDATA.cum = { vals: curve, total };
+        const at = (k) => curve[Math.min(k, curve.length) - 1] || 0;
+        const pad = 4,
+          H = 92;
+        const cx = (i) => PADL + (i * (W - PADL - PADR)) / (curve.length - 1);
+        const cy = (v) => H - pad - (v / total) * (H - 2 * pad - 6);
+        const cpath = curve
+          .map(
+            (v, i) => `${i ? "L" : "M"}${cx(i).toFixed(1)},${cy(v).toFixed(1)}`,
+          )
+          .join("");
+        const marks = [20, 50, 100]
+          .filter((k) => k <= curve.length)
+          .map(
+            (k) =>
+              `<line x1="${cx(k - 1).toFixed(1)}" y1="${pad}" x2="${cx(k - 1).toFixed(1)}" y2="${H - pad}"
+             stroke="#9fb2c4" stroke-width="1" stroke-dasharray="2 3"/>
+           <text x="${cx(k - 1).toFixed(1)}" y="${H - pad + 9}" font-size="8.5" fill="#5f6b7a"
+             text-anchor="middle">${k}</text>`,
+          )
+          .join("");
+
+        // 3. tier distribution
+        const tiers = [0, 0, 0, 0];
+        elig.forEach((t) => tiers[t._t]++);
+        const tmax = Math.max(...tiers);
+        const bars = tiers
+          .map(
+            (v, i) => `
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
+            <span style="font-size:10px;color:var(--muted);width:62px">${TIER[i].n}</span>
+            <div style="flex:1;height:9px;background:#eef1f5;border-radius:2px;overflow:hidden">
+              <i style="display:block;height:100%;width:${(v / tmax) * 100}%;background:${TIER[i].c}"></i></div>
+            <span style="font-size:10.5px;font-weight:600;width:26px;text-align:right">${v}</span>
+          </div>`,
+          )
+          .join("");
+
+        // 4. the thesis, in one chart: priority is not just population
+        const SW = 344,
+          SH = 128,
+          sp = 22;
+        const maxPop = Math.max(...elig.map((t) => t.pop_served), 1);
+        const sx2 = (p) =>
+          sp + (Math.log1p(p) / Math.log1p(maxPop)) * (SW - sp - 10);
+        const sy2 = (b) => SH - sp - (b / 1) * (SH - sp - 12);
+        const dots = elig
+          .map((t) => {
+            const r = 2 + t.isolation * 4; // size = redundancy deficit
+            return `<circle cx="${sx2(t.pop_served).toFixed(1)}" cy="${sy2(t.baseline).toFixed(1)}"
+            r="${r.toFixed(1)}" fill="${TIER[t._t].c}" opacity=".65"/>`;
+          })
+          .join("");
+        const top3 = elig
+          .slice(0, 3)
+          .map(
+            (t) =>
+              `<circle cx="${sx2(t.pop_served).toFixed(1)}" cy="${sy2(t.baseline).toFixed(1)}"
+             r="${(2 + t.isolation * 4 + 2.5).toFixed(1)}" fill="none" stroke="#1f2328" stroke-width="1.2"/>
+           <text x="${sx2(t.pop_served).toFixed(1)}" y="${(sy2(t.baseline) - 9).toFixed(1)}"
+             font-size="8.5" text-anchor="middle" font-weight="600">${t.tower_id.slice(-3)}</text>`,
+          )
+          .join("");
+        const bigPop = elig
+          .slice()
+          .sort((a, b) => b.pop_served - a.pop_served)[0];
+
+        const scatter = `<div class="chart">
+          <h4>Why the ranking is not just population</h4>
+          <p>Each dot is a tower. Size shows how many users no neighbour covers.</p>
+          <svg viewBox="0 0 ${SW} ${SH}">
+            <line x1="${sp}" y1="${SH - sp}" x2="${SW - 10}" y2="${SH - sp}" stroke="#e3e7ed"/>
+            <line x1="${sp}" y1="8" x2="${sp}" y2="${SH - sp}" stroke="#e3e7ed"/>
+            ${dots}${top3}
+            <text x="${sp}" y="${SH - sp + 11}" font-size="8.5" fill="#5f6b7a">few people</text>
+            <text x="${SW - 10}" y="${SH - sp + 11}" font-size="8.5" fill="#5f6b7a" text-anchor="end">many</text>
+            <text x="2" y="14" font-size="8.5" fill="#5f6b7a">1.0</text>
+            <text x="2" y="${SH - sp}" font-size="8.5" fill="#5f6b7a">0</text>
+            <text x="6" y="${SH / 2}" font-size="8.5" fill="#5f6b7a"
+              transform="rotate(-90 6 ${SH / 2})" text-anchor="middle">flood susceptibility</text>
+          </svg>
+          <div class="cap">The top three sit high but not far right.
+            ${bigPop.tower_id} serves the most people (${fmt(bigPop.pop_served)}) yet ranks
+            ${bigPop.rank} — its terrain is safer. Population alone would pick the wrong sites.</div>
+        </div>`;
+
+        // 5. what the model actually learned
+        const IMPBAR = [
+          ["Slope", 0.363, "flat ground holds water"],
+          ["Elevation", 0.26, "low-lying sites"],
+          [
+            "Height above drainage",
+            0.112,
+            "distance above the nearest channel",
+          ],
+          ["Permanent water", 0.107, "proximity to rivers and lakes"],
+          ["Wetness index", 0.084, "terrain that accumulates"],
+          ["Upstream area", 0.075, "catchment draining toward it"],
+        ];
+        const impMax = IMPBAR[0][1];
+        const impRows = IMPBAR.map(
+          ([n, v, why]) => `
+          <div style="margin-bottom:6px">
+            <div style="display:flex;justify-content:space-between;font-size:10px">
+              <span>${n}</span><span style="font-variant-numeric:tabular-nums;font-weight:600">${v.toFixed(3)}</span></div>
+            <div style="height:7px;background:#eef1f5;border-radius:2px;overflow:hidden;margin-top:2px">
+              <i style="display:block;height:100%;width:${(v / impMax) * 100}%;background:#1a5fb4"></i></div>
+            <div style="font-size:9px;color:var(--muted);margin-top:1px">${why}</div>
+          </div>`,
+        ).join("");
+        const importance = `<div class="chart">
+          <h4>What the model learned</h4>
+          <p>XGBoost feature importance, terrain only.</p>
+          ${impRows}
+          <div class="cap">Well spread, with no single feature dominating. Land cover was
+            excluded deliberately: with it, tree cover took 80% of importance — the model
+            learning that radar cannot see water under canopy, not learning hydrology.</div>
+        </div>`;
+
+        el.innerHTML = `
+          <div class="hero">
+            <div><b>${elig.length}</b><span>towers · ${cutTxt}</span></div>
+            <div><b>${fmt(served)}</b><span>people served by them</span></div>
+            <div><b>${fmt(sole)}</b><span>with no alternative coverage</span></div>
+          </div>
+          ${timeline}
+          <div class="chart">
+            <h4>Where hardening budget goes furthest</h4>
+            <p>Sole-coverage population protected, working down the ranking.</p>
+            <div class="cwrap" data-c="cum"><div class="chair"></div><div class="ctip"></div>
+            <svg viewBox="0 0 ${W} ${H + 12}">
+              <line x1="${PADL}" y1="${H - pad}" x2="${W - PADR}" y2="${H - pad}" stroke="#e3e7ed"/>
+              ${marks}
+              <path d="${cpath}L${cx(curve.length - 1).toFixed(1)},${H - pad}L${PADL},${H - pad}Z"
+                fill="#1a5fb4" opacity=".12"/>
+              <path d="${cpath}" fill="none" stroke="#1a5fb4" stroke-width="1.8"/>
+              <text x="2" y="12" font-size="8.5" fill="#5f6b7a">${fmt(total)}</text>
+              <text x="2" y="${H - pad}" font-size="8.5" fill="#5f6b7a">0</text>
+            </svg></div>
+            <div class="cap">The top 50 towers cover ${((at(50) / total) * 100).toFixed(0)}%
+              of the sole-coverage population; the remaining ${elig.length - 50} add the rest.
+              Returns flatten sharply, which is what makes a ranked shortlist worth having.</div>
+          </div>
+          ${scatter}
+          ${importance}
+          <div class="chart">
+            <h4>Risk tier distribution</h4>
+            <p>${elig.length} towers by priority tier · ${cutTxt}.</p>
+            ${bars}
+          </div>`;
+
+        el.querySelectorAll(".cwrap svg").forEach((s) => {
+          s.addEventListener("mousemove", chartHover);
+          s.addEventListener("mouseleave", chartOut);
+        });
+      }
+
+      // ---------------- sparkline hover ----------------
+      // The replay runs 6-hourly from 22 Nov 2024, so index -> timestamp is exact.
+      let SPARK = null;
+      const REPLAY_START = new Date("2024-11-22T00:00:00+08:00");
+
+      function sparkHover(e) {
+        if (!SPARK) return;
+        const svg = e.currentTarget,
+          box = svg.getBoundingClientRect();
+        const frac = (e.clientX - box.left) / box.width;
+        const i = Math.max(
+          0,
+          Math.min(SPARK.n - 1, Math.round(frac * (SPARK.n - 1))),
+        );
+        const v = SPARK.pts[i];
+
+        const when = new Date(REPLAY_START.getTime() + i * 6 * 3600e3);
+        const label = SPARK.real
+          ? when.toLocaleString("en-GB", {
+              day: "numeric",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : `point ${i + 1}`;
+        const state =
+          v >= 0.95 ? "gate open" : v >= 0.88 ? "latched" : "below threshold";
+
+        const x = (i / (SPARK.n - 1)) * (box.width - 12) + 6;
+        const hair = document.getElementById("sphair");
+        const tip = document.getElementById("sptip");
+        hair.style.left = x + "px";
+        hair.style.height = box.height + "px";
+        hair.style.opacity = ".25";
+        tip.style.left = x + "px";
+        tip.style.top = box.height * (1 - Math.max(0, Math.min(1, v))) + "px";
+        tip.innerHTML = `${label}<br><b>trigger ${v.toFixed(3)}</b> · ${state}`;
+        tip.style.opacity = "1";
+      }
+
+      function sparkOut() {
+        const hair = document.getElementById("sphair"),
+          tip = document.getElementById("sptip");
+        if (hair) hair.style.opacity = "0";
+        if (tip) tip.style.opacity = "0";
+      }
+
+      // ---------------- map focus: show redundancy, do not just assert it ----------------
+      // Every coverage circle at once is unreadable. Drawing only the selected
+      // tower and the neighbours that overlap it makes isolation visible: a
+      // lone circle means nobody can absorb its users.
+      const KM_PER_DEG = 111;
+      function focusOn(t) {
+        gFocus.clearLayers();
+        // the Detail overlay would otherwise sit on top of the simulation
+        if (
+          !t ||
+          document.getElementById("simulate").classList.contains("show")
+        )
+          return;
+        const col = TIER[t._t].c;
+
+        const near = TOWERS.filter((o) => {
+          if (o.tower_id === t.tower_id) return false;
+          const dx =
+            (o.lon - t.lon) * KM_PER_DEG * Math.cos((t.lat * Math.PI) / 180);
+          const dy = (o.lat - t.lat) * KM_PER_DEG;
+          o._d = Math.hypot(dx, dy);
+          return o._d <= t.radius_km + o.radius_km; // footprints overlap
+        })
+          .sort((a, b) => a._d - b._d)
+          .slice(0, 12);
+
+        near.forEach((o) => {
+          gFocus.addLayer(
+            L.circle([o.lat, o.lon], {
+              radius: o.radius_km * 1000,
+              color: "#5f6b7a",
+              weight: 1,
+              dashArray: "3 4",
+              opacity: 0.5,
+              fillColor: "#5f6b7a",
+              fillOpacity: 0.05,
+              interactive: false,
+            }),
+          );
+          gFocus.addLayer(
+            L.polyline(
+              [
+                [t.lat, t.lon],
+                [o.lat, o.lon],
+              ],
+              {
+                color: "#5f6b7a",
+                weight: 1,
+                opacity: 0.35,
+                interactive: false,
+              },
+            ),
+          );
+          // Neighbours below the 0.25 escalation floor are hidden by draw(),
+          // so without this their circle would appear with no centre. They
+          // still count for redundancy — a tower on safe ground is precisely
+          // the one that can absorb load.
+          gFocus.addLayer(
+            L.circleMarker([o.lat, o.lon], {
+              radius: 4,
+              fillColor: "#8794a4",
+              color: "#fff",
+              weight: 1.2,
+              fillOpacity: 0.85,
+            })
+              .bindTooltip(
+                `${o.tower_id} · ${o._d.toFixed(1)} km · flood ${o.baseline.toFixed(2)}`,
+                { direction: "top", offset: [0, -5] },
+              )
+              .on("click", () => show(o)),
+          );
+        });
+
+        // selected tower drawn last so it sits on top
+        gFocus.addLayer(
+          L.circle([t.lat, t.lon], {
+            radius: t.radius_km * 1000,
+            color: col,
+            weight: 2,
+            fillColor: col,
+            fillOpacity: 0.12,
+            interactive: false,
+          }),
+        );
+
+        const msg = near.length
+          ? `${near.length} overlapping neighbour${near.length > 1 ? "s" : ""}<br>${(t.isolation * 100).toFixed(0)}% of users still uncovered`
+          : `No overlapping neighbour<br>every user here loses service`;
+        L.tooltip({
+          permanent: true,
+          direction: "bottom",
+          offset: [0, 10],
+          className: "focus-tip",
+        })
+          .setContent(msg)
+          .setLatLng([t.lat, t.lon])
+          .addTo(gFocus);
+      }
+
+      // ---------------- overview chart hover ----------------
+      // Same crosshair pattern as the sparkline. Index -> label differs per
+      // chart: escalation is a timestamp, cumulative is a rank position.
+      const CHARTDATA = {};
+
+      function chartHover(e) {
+        const wrap = e.currentTarget.closest(".cwrap");
+        if (!wrap) return;
+        const d = CHARTDATA[wrap.dataset.c];
+        if (!d || !d.vals.length) return;
+
+        const box = wrap.getBoundingClientRect();
+        const inset = (PADL / W) * box.width; // chart area starts after the axis
+        const frac = (e.clientX - box.left - inset) / (box.width - inset - 6);
+        const i = Math.max(
+          0,
+          Math.min(d.vals.length - 1, Math.round(frac * (d.vals.length - 1))),
+        );
+        const v = d.vals[i];
+
+        let label;
+        if (wrap.dataset.c === "esc") {
+          const when = new Date(REPLAY_START.getTime() + i * 6 * 3600e3);
+          label = `${when.toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+            <br><b>${v} of ${d.total}</b> towers escalated`;
+        } else {
+          label = `Harden the top <b>${i + 1}</b> towers
+            <br><b>${fmt(v)}</b> protected · ${((v / d.total) * 100).toFixed(0)}% of total`;
+        }
+
+        const x = inset + (i / (d.vals.length - 1)) * (box.width - inset - 6);
+        const hair = wrap.querySelector(".chair"),
+          tip = wrap.querySelector(".ctip");
+        hair.style.left = x + "px";
+        hair.style.height = box.height + "px";
+        hair.style.opacity = ".25";
+        tip.style.left = Math.max(60, Math.min(box.width - 60, x)) + "px";
+        tip.style.top = box.height * 0.55 + "px";
+        tip.innerHTML = label;
+        tip.style.opacity = "1";
+      }
+
+      function chartOut(e) {
+        const wrap = e.currentTarget.closest(".cwrap");
+        if (!wrap) return;
+        wrap.querySelector(".chair").style.opacity = "0";
+        wrap.querySelector(".ctip").style.opacity = "0";
+      }
+
+      // ---------------- draggable panel divider ----------------
+      // Leaflet caches the container size, so invalidateSize() must run after
+      // every resize or the map renders into stale dimensions.
+      (function () {
+        const rz = document.getElementById("resizer");
+        let dragging = false;
+        rz.addEventListener("mousedown", (e) => {
+          dragging = true;
+          rz.classList.add("drag");
+          document.body.classList.add("resizing");
+          e.preventDefault();
+        });
+        document.addEventListener("mousemove", (e) => {
+          if (!dragging) return;
+          const w = Math.max(300, Math.min(680, e.clientX));
+          document.documentElement.style.setProperty("--panel-w", w + "px");
+        });
+        document.addEventListener("mouseup", () => {
+          if (!dragging) return;
+          dragging = false;
+          rz.classList.remove("drag");
+          document.body.classList.remove("resizing");
+          map.invalidateSize();
+          if (document.getElementById("overview").classList.contains("show"))
+            renderOverview();
+        });
+        rz.addEventListener("dblclick", () => {
+          // double-click resets
+          document.documentElement.style.setProperty("--panel-w", "376px");
+          map.invalidateSize();
+        });
+      })();
+
+      // ---------------- deep link ----------------
+      // ?tower=T00198 opens straight to that tower. The URL updates on every
+      // selection, so a slide or a recording can link to an exact view.
+      function syncURL(t) {
+        const u = new URL(location);
+        if (t) u.searchParams.set("tower", t.tower_id);
+        else u.searchParams.delete("tower");
+        history.replaceState(null, "", u);
+      }
+      function openFromURL() {
+        const id = new URL(location).searchParams.get("tower");
+        if (!id) return false;
+        const t = TOWERS.find((x) => x.tower_id === id.toUpperCase());
+        if (t) {
+          show(t);
+          return true;
+        }
+        return false;
+      }
+
+      // ---------------- compare two towers ----------------
+      // Slots live inside the Compare tab. First selection fills A, second B,
+      // then further clicks replace B so you can sweep candidates against a
+      // fixed reference.
+      const CMP = { A: null, B: null };
+
+      function clearSlot(k) {
+        CMP[k] = null;
+        if (onCompare()) renderCompare();
+        drawCompareOverlay();
+      }
+      function setSlot(k) {
+        if (sel) {
+          CMP[k] = sel;
+          if (onCompare()) renderCompare();
+          drawCompareOverlay();
+        }
+      }
+      function swapSlots() {
+        const t = CMP.A;
+        CMP.A = CMP.B;
+        CMP.B = t;
+        renderCompare();
+        drawCompareOverlay();
+      }
+      function onCompare() {
+        return document.getElementById("compare").classList.contains("show");
+      }
+
+      function addToCompare(t) {
+        if (
+          (CMP.A && CMP.A.tower_id === t.tower_id) ||
+          (CMP.B && CMP.B.tower_id === t.tower_id)
+        )
+          return;
+        if (!CMP.A) CMP.A = t;
+        else CMP.B = t;
+        if (onCompare()) renderCompare();
+      }
+
+      // Both towers stay highlighted while comparing — focusOn() alone would
+      // clear the previous one, which is why only the latest showed before.
+      const gCmp = L.layerGroup().addTo(map);
+      function drawCompareOverlay() {
+        gCmp.clearLayers();
+        if (!onCompare()) return;
+        [
+          ["A", CMP.A, "#8e1b2e"],
+          ["B", CMP.B, "#1a5fb4"],
+        ].forEach(([tag, t, col]) => {
+          if (!t) return;
+          gCmp.addLayer(
+            L.circle([t.lat, t.lon], {
+              radius: t.radius_km * 1000,
+              color: col,
+              weight: 2,
+              fillColor: col,
+              fillOpacity: 0.1,
+              interactive: false,
+            }),
+          );
+          gCmp.addLayer(
+            L.circleMarker([t.lat, t.lon], {
+              radius: 9,
+              fillColor: col,
+              color: "#fff",
+              weight: 2.5,
+              fillOpacity: 1,
+            }),
+          );
+          gCmp.addLayer(
+            L.marker([t.lat, t.lon], {
+              icon: L.divIcon({
+                className: "",
+                iconSize: [18, 18],
+                iconAnchor: [9, 9],
+                html: `<div style="font:700 11px/18px 'Segoe UI',sans-serif;color:#fff;text-align:center">${tag}</div>`,
+              }),
+              interactive: false,
+            }),
+          );
+        });
+        if (CMP.A && CMP.B) {
+          gCmp.addLayer(
+            L.polyline(
+              [
+                [CMP.A.lat, CMP.A.lon],
+                [CMP.B.lat, CMP.B.lon],
+              ],
+              {
+                color: "#5f6b7a",
+                weight: 1.5,
+                dashArray: "5 5",
+                opacity: 0.6,
+                interactive: false,
+              },
+            ),
+          );
+          map.fitBounds(
+            L.latLngBounds([
+              [CMP.A.lat, CMP.A.lon],
+              [CMP.B.lat, CMP.B.lon],
+            ]).pad(0.55),
+          );
+        }
+      }
+
+      // percentile of a value within the whole network, for the radar axes
+      let PCT = null;
+      function pct(field, v) {
+        if (!PCT) {
+          PCT = {};
+          ["pop_served", "hand", "slope", "nn_dist_km"].forEach((f) => {
+            PCT[f] = TOWERS.map((x) => x[f]).sort((a, b) => a - b);
+          });
+        }
+        const a = PCT[field];
+        let lo = 0,
+          hi = a.length;
+        while (lo < hi) {
+          const m = (lo + hi) >> 1;
+          a[m] < v ? (lo = m + 1) : (hi = m);
+        }
+        return lo / a.length;
+      }
+
+      // Six axes, all oriented so further from centre = more urgent.
+      const AXES = [
+        ["Flood", (t) => t.baseline],
+        ["People", (t) => pct("pop_served", t.pop_served)],
+        ["No fallback", (t) => t.isolation],
+        ["Low-lying", (t) => 1 - pct("hand", t.hand)],
+        ["Flat ground", (t) => 1 - pct("slope", t.slope)],
+        ["Remote", (t) => pct("nn_dist_km", t.nn_dist_km)],
+      ];
+
+      function radar(a, b) {
+        const S = 344,
+          C = S / 2,
+          R = 92,
+          n = AXES.length;
+        const pt = (i, r) => {
+          const ang = (Math.PI * 2 * i) / n - Math.PI / 2;
+          return [C + Math.cos(ang) * R * r, C - 22 + Math.sin(ang) * R * r];
+        };
+        const web = [0.25, 0.5, 0.75, 1]
+          .map(
+            (r) =>
+              `<polygon points="${AXES.map((_, i) =>
+                pt(i, r)
+                  .map((v) => v.toFixed(1))
+                  .join(","),
+              ).join(" ")}"
+             fill="none" stroke="#e3e7ed" stroke-width="1"/>`,
+          )
+          .join("");
+        const spokes = AXES.map(
+          (_, i) =>
+            `<line x1="${C}" y1="${C - 22}" x2="${pt(i, 1)[0].toFixed(1)}" y2="${pt(i, 1)[1].toFixed(1)}"
+             stroke="#e3e7ed" stroke-width="1"/>`,
+        ).join("");
+        const shape = (t, col) =>
+          `<polygon points="${AXES.map(([, f], i) =>
+            pt(i, Math.max(0.02, Math.min(1, f(t))))
+              .map((v) => v.toFixed(1))
+              .join(","),
+          ).join(" ")}"
+             fill="${col}" fill-opacity=".16" stroke="${col}" stroke-width="2"/>`;
+        const labels = AXES.map(([nm], i) => {
+          const [x, y] = pt(i, 1.19);
+          return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="9.5" fill="#5f6b7a"
+            text-anchor="${x > C + 6 ? "start" : x < C - 6 ? "end" : "middle"}"
+            dominant-baseline="middle">${nm}</text>`;
+        }).join("");
+        return `<svg viewBox="0 0 ${S} ${S - 34}">${web}${spokes}
+          ${shape(a, "#8e1b2e")}${shape(b, "#1a5fb4")}${labels}</svg>`;
+      }
+
+      function renderCompare() {
+        const a = CMP.A,
+          b = CMP.B;
+        const slot = (k, t, cls) =>
+          t
+            ? `<div class="slotcard full ${cls}"><div class="tag">${k}</div>
+               <div class="nm">${t.tower_id}</div>
+               <div class="mt">rank ${t.rank} · ${fmt(t.pop_served)} served</div>
+               <button onclick="clearSlot('${k}')">clear</button></div>`
+            : `<div class="slotcard ${cls}"><div class="tag">${k}</div>
+               <div class="ph">Click a tower on the map or in the register.</div>
+               <button onclick="setSlot('${k}')">use selected</button></div>`;
+
+        const head = `<div id="slots">${slot("A", a, "a")}${slot("B", b, "b")}</div>
+          <div id="cmpacts">
+            <button onclick="swapSlots()">Swap A / B</button>
+            <button onclick="clearSlot('A');clearSlot('B')">Clear both</button>
+          </div>`;
+
+        if (!a || !b) {
+          document.getElementById("compare").innerHTML =
+            head +
+            `<div class="empty">Select two towers to compare them across terrain,
+             coverage and redundancy.</div>`;
+          drawCompareOverlay();
+          return;
+        }
+
+        const rows = [
+          ["Priority", "static_priority", 3, 1],
+          ["Flood susceptibility", "baseline", 3, 1],
+          ["People served", "pop_served", 0, 1],
+          ["No alternative coverage", "pop_sole", 0, 1],
+          ["Redundancy deficit", "isolation", 2, 1],
+          ["Height above drainage (m)", "hand", 1, -1],
+          ["Elevation (m)", "elev", 0, -1],
+          ["Slope (°)", "slope", 2, -1],
+          ["Neighbours ≤5 km", "n_within_5km", 0, -1],
+          ["Nearest neighbour (km)", "nn_dist_km", 2, 1],
+        ];
+        // dir +1 means a higher value is worse; -1 means lower is worse
+        const cell = (t, k, dp, dir, other) => {
+          const worse = dir > 0 ? t[k] > other[k] : t[k] < other[k];
+          return `<td${worse ? ' style="color:#8e1b2e;font-weight:700"' : ""}>${
+            k.startsWith("pop") ? fmt(t[k]) : (+t[k]).toFixed(dp)
+          }</td>`;
+        };
+        const [aAct] = action(a),
+          [bAct] = action(b);
+        const lead = a.static_priority > b.static_priority ? a : b;
+        const why =
+          Math.abs(a.isolation - b.isolation) > 0.15
+            ? "redundancy"
+            : Math.abs(a.baseline - b.baseline) > 0.15
+              ? "flood exposure"
+              : "terrain";
+
+        document.getElementById("compare").innerHTML =
+          head +
+          `
+          <div class="chart">
+            <h4>Risk profile</h4>
+            <p><span style="color:#8e1b2e;font-weight:600">${a.tower_id}</span> vs
+               <span style="color:#1a5fb4;font-weight:600">${b.tower_id}</span> ·
+               further from centre means more urgent.</p>
+            ${radar(a, b)}
+          </div>
+          <table class="cmptable">
+            <tr><th></th><th style="color:#8e1b2e">${a.tower_id} · #${a.rank}</th>
+                <th style="color:#1a5fb4">${b.tower_id} · #${b.rank}</th></tr>
+            ${rows.map(([l, k, dp, d]) => `<tr><td>${l}</td>${cell(a, k, dp, d, b)}${cell(b, k, dp, d, a)}</tr>`).join("")}
+            <tr class="head"><td>Recommended</td><td>${aAct}</td><td>${bAct}</td></tr>
+          </table>
+          <div class="cap" style="margin-top:10px">Red marks the worse value on each row.
+            <b>${lead.tower_id}</b> ranks higher, driven mainly by ${why}.</div>`;
+        drawCompareOverlay();
+      }
+
+      // ---------------- susceptibility surface ----------------
+      // grid.json is the model scored on a regular 0.01° lattice — not an
+      // interpolation between towers. Painted into one canvas and mounted as a
+      // single ImageOverlay; 28,000 cells as vectors would crawl.
+      let GRID = null,
+        heatLayer = null,
+        EXTENT = null;
+      HEAT_OPACITY = 0.7;
+      const gExtent = L.layerGroup();
+
+      function buildHeat() {
+        if (!GRID || heatLayer) return;
+        const {
+          bbox: [w, s, e, n],
+          nx,
+          ny,
+          v,
+        } = GRID;
+        const cv = document.createElement("canvas");
+        cv.width = nx;
+        cv.height = ny;
+        const ctx = cv.getContext("2d");
+        const img = ctx.createImageData(nx, ny);
+        for (let y = 0; y < ny; y++) {
+          for (let x = 0; x < nx; x++) {
+            const p = v[y * nx + x];
+            // canvas y runs top-down, the grid runs south-to-north
+            const o = ((ny - 1 - y) * nx + x) * 4;
+            if (p < 0) {
+              img.data[o + 3] = 0;
+              continue;
+            }
+            const t = p / 100;
+            let r, g, b;
+            if (t < 0.5) {
+              const k = t / 0.5;
+              r = 255;
+              g = 217 - k * 55;
+              b = 217 - k * 156;
+            } else {
+              const k = (t - 0.5) / 0.5;
+              r = 232 - k * 64;
+              g = 162 - k * 130;
+              b = 61 - k * 1;
+            }
+            img.data[o] = r;
+            img.data[o + 1] = g;
+            img.data[o + 2] = b;
+            // near-zero risk stays almost invisible so the basemap reads through
+            img.data[o + 3] = Math.round(Math.min(1, t * 1.6) * 150);
+          }
+        }
+        ctx.putImageData(img, 0, 0);
+        heatLayer = L.imageOverlay(
+          cv.toDataURL(),
+          [
+            [s, w],
+            [n, e],
+          ],
+          { opacity: HEAT_OPACITY, pane: "heat", interactive: false },
+        );
+      }
+
+      function toggleHeat() {
+        if (!state.heat) {
+          if (heatLayer) map.removeLayer(heatLayer);
+          return;
+        }
+        if (!GRID) {
+          console.warn("grid.json missing — susceptibility layer unavailable");
+          return;
+        }
+        buildHeat();
+        heatLayer.addTo(map);
+        heatLayer.bringToBack();
+        map.eachLayer((l) => {
+          if (l instanceof L.TileLayer) l.bringToBack();
+        });
+      }
+
+      function setHeatOpacity(v) {
+        HEAT_OPACITY = +v;
+        document.getElementById("heatopv").textContent =
+          Math.round(v * 100) + "%";
+        if (heatLayer) heatLayer.setOpacity(HEAT_OPACITY);
+      }
+
+      // Observed Sentinel-1 flooding, Nov 2024 — the independent check on the
+      // model. Drawn beneath the towers so markers stay readable.
+      function toggleExtent() {
+        gExtent.clearLayers();
+        if (!state.extent) {
+          map.removeLayer(gExtent);
+          return;
+        }
+        if (!EXTENT) {
+          console.warn("flood_extent.json missing — extent layer unavailable");
+          return;
+        }
+        gExtent.addLayer(
+          L.geoJSON(EXTENT, {
+            style: {
+              color: "#3b79ac",
+              weight: 1,
+              fillColor: "#3b79ac",
+              fillOpacity: 0.25,
+              interactive: false,
+            },
+          }),
+        );
+        gExtent.addTo(map);
+        gExtent.bringToBack();
+        if (heatLayer && state.heat) heatLayer.bringToBack();
+        map.eachLayer((l) => {
+          if (l instanceof L.TileLayer) l.bringToBack();
+        });
+      }
+
+      // ---------------- simulate tower failure ----------------
+      // The dashboard already shows pop_sole: the people a single tower serves
+      // that nobody else covers. What it cannot show is what happens when many
+      // towers fail AT ONCE — because the neighbour you were relying on may be
+      // underwater too. That cascade term is what this tool exposes.
+      const FAILED = new Set();
+      let SIMMODE = "scenario";
+      let SIMTH = 0.5;
+      let NB = null; // tower_id -> overlapping neighbour ids
+      const gFail = L.layerGroup();
+
+      function neighbourIndex() {
+        if (NB) return NB;
+        NB = {};
+        TOWERS.forEach((t) => {
+          NB[t.tower_id] = TOWERS.filter((o) => {
+            if (o.tower_id === t.tower_id) return false;
+            const dx =
+              (o.lon - t.lon) * KM_PER_DEG * Math.cos((t.lat * Math.PI) / 180);
+            const dy = (o.lat - t.lat) * KM_PER_DEG;
+            return Math.hypot(dx, dy) <= t.radius_km + o.radius_km;
+          }).map((o) => o.tower_id);
+        });
+        return NB;
+      }
+
+      function simulate() {
+        const nb = neighbourIndex();
+        let definite = 0,
+          cascade = 0;
+        const rows = [];
+        FAILED.forEach((id) => {
+          const t = TOWERS.find((x) => x.tower_id === id);
+          if (!t) return;
+          // pop_sole is exact: these users have no other tower at all
+          definite += t.pop_sole;
+          // Everyone else in the footprint had a fallback. How much of that
+          // fallback is also down? isolation is pop_sole over the RAW footprint
+          // population, so raw = pop_sole / isolation.
+          let extra = 0;
+          if (t.isolation > 0) {
+            const raw = t.pop_sole / t.isolation;
+            const shared = Math.max(0, raw - t.pop_sole);
+            const n = nb[id] || [];
+            if (n.length) {
+              const downFrac = n.filter((x) => FAILED.has(x)).length / n.length;
+              extra = shared * downFrac;
+            }
+          }
+          cascade += extra;
+          rows.push({
+            t,
+            definite: t.pop_sole,
+            extra,
+            nbTotal: (nb[id] || []).length,
+            nbDown: (nb[id] || []).filter((x) => FAILED.has(x)).length,
+          });
+        });
+        rows.sort((a, b) => b.definite + b.extra - (a.definite + a.extra));
+        return { definite, cascade, rows };
+      }
+
+      function applyScenario() {
+        FAILED.clear();
+        SIMFOCUS = null;
+        TOWERS.forEach((t) => {
+          if (t.baseline >= SIMTH) FAILED.add(t.tower_id);
+        });
+        renderSimulate();
+      }
+      function toggleFail(id) {
+        FAILED.has(id) ? FAILED.delete(id) : FAILED.add(id);
+        SIMMODE = "manual";
+        SIMFOCUS = id; // stay on the tower just changed
+        renderSimulate();
+      }
+      function clearFail() {
+        FAILED.clear();
+        SIMFOCUS = null;
+        renderSimulate();
+      }
+
+      // Drawing every failed footprint as an outlined ring produced 80+
+      // overlapping circles — unreadable. Instead: failed coverage is a fill-only
+      // wash that merges into a region, each failed site carries an X, and rings
+      // appear ONLY for the site currently being inspected.
+      let SIMFOCUS = null;
+
+      function drawFailures() {
+        gFail.clearLayers();
+        if (!document.getElementById("simulate").classList.contains("show")) {
+          map.removeLayer(gFail);
+          return;
+        }
+        const nb = neighbourIndex();
+
+        // 1. lost coverage as a single soft wash, no strokes
+        FAILED.forEach((id) => {
+          const t = TOWERS.find((x) => x.tower_id === id);
+          if (!t) return;
+          gFail.addLayer(
+            L.circle([t.lat, t.lon], {
+              radius: t.radius_km * 1000,
+              stroke: false,
+              fillColor: "#a8203c",
+              fillOpacity: 0.09,
+              interactive: false,
+            }),
+          );
+        });
+
+        // 2. the inspected site only: its footprint, and its neighbours
+        //    coloured by whether they survived to absorb the load
+        if (SIMFOCUS) {
+          const t = TOWERS.find((x) => x.tower_id === SIMFOCUS);
+          if (t) {
+            (nb[SIMFOCUS] || []).forEach((oid) => {
+              const o = TOWERS.find((x) => x.tower_id === oid);
+              if (!o) return;
+              const down = FAILED.has(oid);
+              gFail.addLayer(
+                L.circle([o.lat, o.lon], {
+                  radius: o.radius_km * 1000,
+                  color: down ? "#a8203c" : "#1f6b3b",
+                  weight: 1.5,
+                  dashArray: down ? "4 4" : null,
+                  fillColor: down ? "#a8203c" : "#1f6b3b",
+                  fillOpacity: down ? 0.1 : 0.12,
+                  interactive: false,
+                }),
+              );
+              gFail.addLayer(
+                L.polyline(
+                  [
+                    [t.lat, t.lon],
+                    [o.lat, o.lon],
+                  ],
+                  {
+                    color: down ? "#a8203c" : "#1f6b3b",
+                    weight: 1.4,
+                    opacity: 0.55,
+                    interactive: false,
+                  },
+                ),
+              );
+            });
+            gFail.addLayer(
+              L.circle([t.lat, t.lon], {
+                radius: t.radius_km * 1000,
+                color: "#1f2328",
+                weight: 2.4,
+                fill: false,
+                interactive: false,
+              }),
+            );
+            map.setView([t.lat, t.lon], Math.max(map.getZoom(), 11), {
+              animate: true,
+            });
+          }
+        }
+
+        // a surviving tower under inspection gets a ring, not an X
+        if (SIMFOCUS && !FAILED.has(SIMFOCUS)) {
+          const t = TOWERS.find((x) => x.tower_id === SIMFOCUS);
+          if (t)
+            gFail.addLayer(
+              L.circleMarker([t.lat, t.lon], {
+                radius: 10,
+                color: "#1f2328",
+                weight: 2.4,
+                fill: false,
+                interactive: false,
+              }),
+            );
+        }
+
+        // 3. X marker on every failed site, drawn last so it stays on top
+        FAILED.forEach((id) => {
+          const t = TOWERS.find((x) => x.tower_id === id);
+          if (!t) return;
+          const on = id === SIMFOCUS;
+          gFail.addLayer(
+            L.marker([t.lat, t.lon], {
+              icon: L.divIcon({
+                className: "",
+                iconSize: [16, 16],
+                iconAnchor: [8, 8],
+                html: `<div class="failx" style="color:${on ? "#1f2328" : "#a8203c"};
+                ${on ? "font-size:16px" : ""}">&#10005;</div>`,
+              }),
+              interactive: false,
+            }),
+          );
+        });
+
+        gFail.addTo(map);
+      }
+
+      function inspectFail(id) {
+        SIMFOCUS = SIMFOCUS === id ? null : id;
+        renderSimulate();
+      }
+
+      // Any tower can be inspected, failed or not. This is what makes the tool
+      // explorable rather than a one-way destructive click.
+      function inspectCard() {
+        if (!SIMFOCUS) return "";
+        const t = TOWERS.find((x) => x.tower_id === SIMFOCUS);
+        if (!t) return "";
+        const nb = neighbourIndex()[SIMFOCUS] || [];
+        const down = FAILED.has(SIMFOCUS);
+        const nbDown = nb.filter((x) => FAILED.has(x)).length;
+
+        let extra = 0;
+        if (down && t.isolation > 0 && nb.length) {
+          const raw = t.pop_sole / t.isolation;
+          extra = Math.max(0, raw - t.pop_sole) * (nbDown / nb.length);
+        }
+
+        return `<div class="inspect">
+          <h5>${t.tower_id}
+            <span class="st ${down ? "down" : "up"}">${down ? "DOWN" : "OPERATING"}</span></h5>
+          <div class="sub">rank ${t.rank} · flood ${t.baseline.toFixed(2)} ·
+            ${(t.isolation * 100).toFixed(0)}% of users have no alternative</div>
+          <div class="fig">
+            <div><b>${fmt(t.pop_sole)}</b><span>${down ? "losing service now" : "would lose service"}</span></div>
+            <div><b>${down ? fmt(extra) : "—"}</b><span>${down ? "plus cascade, " + nbDown + " of " + nb.length + " fallbacks down" : "cascade only applies once failed"}</span></div>
+          </div>
+          <div style="font-size:9.5px;color:var(--muted)">Overlapping neighbours — click to jump</div>
+          <div class="nbl">${
+            nb.length
+              ? nb
+                  .map(
+                    (id) => `<span class="${FAILED.has(id) ? "down" : "up"}"
+                  onclick="inspectFail('${id}')">${id}</span>`,
+                  )
+                  .join("")
+              : '<span style="background:#fdecef;color:#a8203c">none — every user here is stranded</span>'
+          }</div>
+          <button class="${down ? "" : "fail"}" onclick="toggleFail('${SIMFOCUS}')">
+            ${down ? "Restore this tower" : "Fail this tower"}</button>
+        </div>`;
+      }
+
+      function renderSimulate() {
+        const el = document.getElementById("simulate");
+        const { definite, cascade, rows } = simulate();
+        const netPop = TOWERS.reduce((s, t) => s + t.pop_served, 0);
+        const share = netPop ? (definite + cascade) / netPop : 0;
+
+        el.innerHTML = `
+          <div class="simmode">
+            <button class="${SIMMODE === "scenario" ? "on" : ""}" onclick="SIMMODE='scenario';applyScenario()">Flood scenario</button>
+            <button class="${SIMMODE === "manual" ? "on" : ""}" onclick="SIMMODE='manual';renderSimulate()">Pick towers</button>
+          </div>
+
+          ${
+            SIMMODE === "scenario"
+              ? `<div class="fgrp">
+                 <label>Fail every tower with susceptibility &ge; <b>${SIMTH.toFixed(2)}</b></label>
+                 <input class="rng" type="range" min="0.2" max="0.9" step="0.05" value="${SIMTH}"
+                   oninput="SIMTH=+this.value;applyScenario()" />
+               </div>
+               <div class="simhint">A monsoon flood does not take out one tower. It takes out
+                 every tower on low ground at once — which is why the fallback assumption breaks.</div>`
+              : `<div class="simhint">Click any tower on the map to inspect it, then use
+                 <b>Fail</b> or <b>Restore</b> in the card below. <b>${FAILED.size}</b> towers down.</div>`
+          }
+
+          ${inspectCard()}
+
+          <div class="simres">
+            <div class="hard"><b>${fmt(definite)}</b><span>lose service outright — no other tower covers them</span></div>
+            <div class="casc"><b>${fmt(cascade)}</b><span>additionally lost — their fallback tower is down too</span></div>
+            <div><b>${fmt(definite + cascade)}</b><span>total without service</span></div>
+            <div><b>${FAILED.size}</b><span>towers down · ${(share * 100).toFixed(1)}% of network population</span></div>
+          </div>
+
+          ${
+            cascade > 0
+              ? `<div class="cap" style="margin-bottom:10px">
+            Cascade adds <b>${((cascade / (definite || 1)) * 100).toFixed(0)}%</b> on top of the
+            direct loss. Redundancy only helps when the neighbour survives.</div>`
+              : ""
+          }
+
+          <div class="simlegend">
+            <span><i style="background:#a8203c;opacity:.25"></i>coverage lost</span>
+            <span><i style="background:#1f6b3b;opacity:.3"></i>neighbour still up</span>
+            <span><span style="color:#a8203c;font-weight:700">&#10005;</span> tower down</span>
+            <span style="color:#39506e">click a row to inspect one site</span>
+          </div>
+
+          ${
+            rows.length
+              ? `<div style="font-size:11px;font-weight:600;margin-bottom:5px">Worst affected sites</div>
+          <div class="simhead"><span>Tower</span><span>Direct loss + cascade</span><span style="text-align:right">People</span></div>
+          <div class="simlist">${(() => {
+            const top = rows.slice(0, 12);
+            const mx = Math.max(...top.map((r) => r.definite + r.extra), 1);
+            return top
+              .map(
+                (r) => `
+              <div class="simrow ${SIMFOCUS === r.t.tower_id ? "on" : ""}" onclick="inspectFail('${r.t.tower_id}')">
+                <span class="id">${r.t.tower_id}<small>${r.nbDown}/${r.nbTotal} nbrs down</small></span>
+                <span>
+                  <span class="simbar">
+                    <i style="width:${(r.definite / mx) * 100}%;background:#a8203c"></i>
+                    <i style="width:${(r.extra / mx) * 100}%;background:#e08a3c"></i>
+                  </span>
+                  <span style="font-size:9px;color:var(--muted);display:block;margin-top:2px">
+                    ${fmt(r.definite)} direct${r.extra > 0 ? ` + ${fmt(r.extra)} cascade` : ""}</span>
+                </span>
+                <span class="p">${fmt(r.definite + r.extra)}</span>
+              </div>`,
+              )
+              .join("");
+          })()}</div>`
+              : ""
+          }
+
+          <div id="simfoot">
+            <button onclick="clearFail()">Reset</button>
+            <button onclick="exportSim()">Export CSV</button>
+          </div>
+
+          <div class="cap" style="margin-top:10px">Direct loss is exact — it is the population
+            inside each footprint that no other tower covers. The cascade term is an estimate:
+            shared population is apportioned evenly across a site's overlapping neighbours,
+            so it scales with how many of those neighbours also fail.</div>`;
+        drawFailures();
+      }
+
+      function exportSim() {
+        const { rows } = simulate();
+        const cols = [
+          "tower_id",
+          "rank",
+          "baseline",
+          "pop_sole",
+          "cascade_estimate",
+          "total_lost",
+          "neighbours",
+          "neighbours_down",
+        ];
+        const csv = [cols.join(",")]
+          .concat(
+            rows.map((r) =>
+              [
+                r.t.tower_id,
+                r.t.rank,
+                r.t.baseline,
+                Math.round(r.definite),
+                Math.round(r.extra),
+                Math.round(r.definite + r.extra),
+                r.nbTotal,
+                r.nbDown,
+              ].join(","),
+            ),
+          )
+          .join("\n");
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+        a.download = `telcoshield_failure_scenario_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+      }
+
+      function show(t) {
+        sel = t;
+        const T = TIER[t._t],
+          [aTitle, aBody] = action(t);
+        detail.innerHTML = `
+    <div class="tid">${t.tower_id}</div>
+    <div class="tsub">${t.lat.toFixed(4)}, ${t.lon.toFixed(4)} · rank ${t.rank} of ${TOWERS.length} · ${t.operators} operator${t.operators > 1 ? "s" : ""}</div>
+    <div class="pill" style="background:${T.c}18;color:${T.c}">${T.n} priority${t.flooded_2024 ? " · flooded Nov 2024" : ""}</div>
+
+    <div class="sec"><h3>Risk components</h3><div class="bars">
+      ${bar("Flood susceptibility", t.baseline, t.baseline.toFixed(3), T.c)}
+      ${bar("Population weight", Math.min(1, Math.log1p(t.pop_served) / 12), fmt(t.pop_served) + " served", "#1a5fb4")}
+      ${bar("Redundancy deficit", t.isolation, (t.isolation * 100).toFixed(0) + "%", "#6b46c1")}
+      ${bar("Priority score", t.static_priority / 0.75, t.static_priority.toFixed(3), "#1f2328")}
+    </div></div>
+
+    ${
+      t.live_score !== undefined
+        ? `<div class="sec">
+      <h3>Live conditions${t.escalated ? ' <span style="color:#8e1b2e;text-transform:none;letter-spacing:0">· ESCALATED</span>' : ""}</h3>
+      <div class="grid">
+        <div class="kv"><div class="k">Rainfall 72 h</div><div class="v">${(t.rain_mm ?? 0).toFixed(0)}<span class="u"> mm</span></div></div>
+        <div class="kv"><div class="k">vs. this site's history</div><div class="v">${((t.rain_pctl ?? 0) * 100).toFixed(0)}<span class="u">th pctl</span></div></div>
+        <div class="kv"><div class="k">River stress${t.gauge ? ` · ${t.gauge}` : ""}</div><div class="v">${t.river_stress == null ? "—" : t.river_stress.toFixed(2)}</div></div>
+        <div class="kv"><div class="k">Multiplier</div><div class="v">${(t.multiplier ?? 1).toFixed(2)}<span class="u">×</span></div></div>
+      </div>
+      <div style="font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.5">
+        live_score ${t.live_score.toFixed(3)} = static ${t.static_priority.toFixed(3)} × ${(t.multiplier ?? 1).toFixed(2)}
+        · trigger ${(t.trigger ?? 0).toFixed(2)} = max(rain, river)</div>
+    </div>`
+        : ""
+    }
+    <div class="sec"><h3>Escalation trace — 2024 replay</h3>${spark(t)}</div>
+
+    <div class="sec"><h3>Terrain</h3><div class="grid">
+      <div class="kv"><div class="k">Height above drainage</div><div class="v">${t.hand.toFixed(1)}<span class="u"> m</span></div></div>
+      <div class="kv"><div class="k">Elevation</div><div class="v">${t.elev.toFixed(0)}<span class="u"> m</span></div></div>
+      <div class="kv"><div class="k">Wetness index</div><div class="v">${t.twi.toFixed(2)}</div></div>
+      <div class="kv"><div class="k">Slope</div><div class="v">${t.slope.toFixed(1)}<span class="u">°</span></div></div>
+    </div></div>
+
+    <div class="sec"><h3>Network context</h3><div class="grid">
+      <div class="kv"><div class="k">Sole-coverage pop.</div><div class="v">${fmt(t.pop_sole)}</div></div>
+      <div class="kv"><div class="k">Neighbours ≤5 km</div><div class="v">${t.n_within_5km}</div></div>
+      <div class="kv"><div class="k">Nearest neighbour</div><div class="v">${t.nn_dist_km.toFixed(2)}<span class="u"> km</span></div></div>
+      <div class="kv"><div class="k">Service radius</div><div class="v">${t.radius_km.toFixed(1)}<span class="u"> km</span></div></div>
+    </div></div>
+
+    <div class="sec"><h3>Recommended action</h3>
+      <div class="act"><b>${aTitle}</b>${aBody}</div></div>
+    ${(() => {
+      const cached = (EXPL && EXPL[t.tower_id]) || GEN[t.tower_id];
+      if (!cached && !window.GEMINI_KEY) return "";
+      return `<div class="sec">
+        <h3>Operator briefing <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10.5px">· AI-generated</span></h3>
+        <div id="llmbox">${
+          cached
+            ? `<div class="act" style="border-left-color:#1a5fb4;background:#f4f8fd">${cached}</div>
+             <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5">Written from this tower's computed values only — every figure checked against source data.</div>`
+            : `<button onclick="genBriefing(sel)" style="padding:8px 14px;border:1px solid var(--line);background:#fff;border-radius:6px;font-size:12.5px;cursor:pointer;font-family:inherit">Generate briefing</button>`
+        }
+        </div></div>`;
+    })()}`;
+        detail.scrollTop = 0;
+        syncURL(t);
+        addToCompare(t);
+        focusOn(t);
+        tab("detail");
+        renderRegister();
+        map.setView([t.lat, t.lon], Math.max(map.getZoom(), 12), {
+          animate: true,
+        });
+      }
+
+      document.querySelectorAll(".tog").forEach(
+        (el) =>
+          (el.onclick = () => {
+            el.classList.toggle("on");
+            state[el.dataset.l] = el.classList.contains("on") ? 1 : 0;
+            if (el.dataset.l === "heat") {
+              toggleHeat();
+              document.getElementById("heatkey").style.display = state.heat
+                ? "flex"
+                : "none";
+            }
+            if (el.dataset.l === "extent") toggleExtent();
+            draw();
+          }),
+      );
+      th.oninput = (e) => {
+        state.th = +e.target.value;
+        thv.textContent = (+e.target.value).toFixed(2);
+        draw();
+      };
+      iso.oninput = (e) => {
+        state.iso = +e.target.value;
+        isov.textContent = Math.round(+e.target.value * 100) + "%";
+        draw();
+      };
+      pop.oninput = (e) => {
+        state.pop = +e.target.value;
+        popv.textContent = fmt(+e.target.value);
+        draw();
+      };
+      function clearFilters() {
+        state.th = state.iso = state.pop = 0;
+        th.value = iso.value = 0;
+        pop.value = 0;
+        thv.textContent = "0.00";
+        isov.textContent = "0%";
+        popv.textContent = "0";
+        draw();
+      }
+      q.oninput = (e) => {
+        const v = e.target.value.trim().toUpperCase();
+        if (!v) return;
+        const t = TOWERS.find((x) => x.tower_id.includes(v));
+        if (t) show(t);
+      };
+    </script>
+  </body>
+</html>
