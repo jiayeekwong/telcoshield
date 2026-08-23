@@ -10183,3 +10183,35 @@ station_id,station,district,basin,river,updated,level,normal,alert,warning,dange
 0710121WL,Sg. Buaya Ikat di Kg. Pulau Lima (F2),Pasir Puteh,Sungai Semerak,Sg. Buaya Ikat,2026-08-24 01:00:00+08:00,0.56,1.0,2.0,3.0,4.0,False,0.0,False,KEL,2026-08-23T17:10:59.395576+00:00
 0710161WL,Sg. Semerak di Tok Bali (F2),Pasir Puteh,Sungai Semerak,Sg. Semerak,2026-08-24 01:00:00+08:00,1.36,0.0,2.5,3.0,4.0,False,0.34,False,KEL,2026-08-23T17:10:59.395576+00:00
 0731001WL,Sg. Semerak di Pasir Puteh (F1),Pasir Puteh,Sungai Semerak,Sg. Semerak,2026-08-24 01:00:00+08:00,1.81,2.0,2.5,3.0,3.2,False,0.0,False,KEL,2026-08-23T17:10:59.395576+00:00
+0730891WL,Sg. Nenggiri di Belatop (F1),Gua Musang,Sungai Kelantan,Sg. Nenggiri,2026-08-23 23:30:00+08:00,611.9,605.5,676.0,678.0,680.0,False,0.08590604026845607,True,KEL,2026-08-23T18:12:52.816207+00:00
+,Sg. Galas di Kg. Pulai (F1),Gua Musang,Sungai Kelantan,Sg. Galas,2026-08-24 02:00:00+08:00,102.8,107.8,108.1,108.9,109.7,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+0730851WL,Sg. Galas di Kg. Lembaga (F1),Gua Musang,Sungai Kelantan,Sg. Galas,2026-08-24 02:00:00+08:00,82.59,82.4,83.7,85.6,87.9,False,0.03454545454545413,False,KEL,2026-08-23T18:12:52.816207+00:00
+,Sg. Aring di Jalan Felda Aring (F1),Gua Musang,Sungai Kelantan,Sg. Lebir,2026-08-23 23:30:00+08:00,61.49,62.0,68.0,70.0,72.0,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+0731531WL,Sg. Lebir di Kuala Koh (F1),Gua Musang,Sungai Kelantan,Sg. Lebir,2026-08-23 23:30:00+08:00,62.72,62.0,67.0,71.0,75.0,False,0.055384615384615296,False,KEL,2026-08-23T18:12:52.816207+00:00
+0730931WL,Sg. Galas di Limau Kasturi (F1),Gua Musang,Sungai Kelantan,Sg. Galas,2026-08-24 02:00:00+08:00,54.0,53.0,56.0,60.0,61.0,False,0.125,False,KEL,2026-08-23T18:12:52.816207+00:00
+0730831WL,Sg. Nenggiri di Bertam (F1),Gua Musang,Sungai Kelantan,Sg. Nenggiri,2026-08-24 02:00:00+08:00,47.5,50.4,53.7,56.2,58.1,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+,Sg. Galas di Dabong (F1),Kuala Krai,Sungai Kelantan,Sg. Galas,2026-08-24 02:00:00+08:00,27.12,28.0,35.0,37.0,38.0,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+0730971WL,Sg. Lebir di Kg. Tualang (F1),Kuala Krai,Sungai Kelantan,Sg. Lebir,2026-08-23 23:30:00+08:00,24.01,23.0,30.0,34.0,35.0,False,0.08416666666666679,False,KEL,2026-08-23T18:12:52.816207+00:00
+0730761WL,Sg. Lebir di Kg. Karangan (F1),Kuala Krai,Sungai Kelantan,Sg. Lebir,2026-08-24 02:00:00+08:00,21.38,19.0,27.0,33.0,34.0,False,0.1586666666666666,False,KEL,2026-08-23T18:12:52.816207+00:00
+0730871WL,Sg. Lebir di Kg. Manik Urai (F1),Kuala Krai,Sungai Kelantan,Sg. Lebir,2026-08-24 02:00:00+08:00,19.96,19.1,30.0,32.0,33.0,False,0.06187050359712227,False,KEL,2026-08-23T18:12:52.816207+00:00
+,Sg. Pahi di Kg. Pahi (F1),Kuala Krai,Sungai Kelantan,Sg. Lebir,2026-08-24 01:00:00+08:00,19.43,17.8,28.0,30.0,32.0,False,0.11478873239436613,False,KEL,2026-08-23T18:12:52.816207+00:00
+,Sg. Kelantan di Kuala Krai (F1),Kuala Krai,Sungai Kelantan,Sg. Kelantan,2026-08-23 23:30:00+08:00,16.09,17.0,20.0,22.5,25.0,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+0730821WL,Sg. Nal di Kg. Sungai Nal (F1),Kuala Krai,Sungai Kelantan,Sg. Nal,2026-08-24 02:00:00+08:00,18.3,21.0,23.5,24.0,25.0,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+0731031WL,"Sg. Pergau di Jambatan Jerimbong, Kuala Balah (F1)",Jeli,Sungai Kelantan,Sg. Pergau,2026-08-24 02:00:00+08:00,43.12,48.2,50.8,53.6,55.7,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+,Sg. Pergau di Kg. Lawar (F1),Jeli,Sungai Kelantan,Sg. Pergau,2026-08-24 02:00:00+08:00,99.42,95.0,101.0,102.0,103.0,False,0.5525000000000002,False,KEL,2026-08-23T18:12:52.816207+00:00
+,Sg. Lanas di Air Lanas (F1),Jeli,Sungai Golok,Sg. Lanas,2026-08-24 02:00:00+08:00,25.09,27.0,28.5,29.0,29.5,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+,Sg. Kelantan di Kusial Baru (F1),Tanah Merah,Sungai Kelantan,Sg. Kelantan,2026-08-24 02:00:00+08:00,7.12,7.0,12.0,14.0,16.0,False,0.013333333333333345,False,KEL,2026-08-23T18:12:52.816207+00:00
+0731371WL,Sg. Kelantan di Kusial (F1),Tanah Merah,Sungai Kelantan,Sg. Kelantan,2026-08-23 23:30:00+08:00,6.98,7.0,12.0,14.0,16.0,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+0740261WL,Sg. Golok di Kg. Jenob (F1),Tanah Merah,Sungai Golok,Sg. Golok,2026-08-24 02:00:00+08:00,18.38,19.0,21.5,22.5,23.5,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+0731361WL,Sg. Kelantan di Kg. Temangan (F1),Machang,Sungai Kelantan,Sg. Kelantan,2026-08-23 23:30:00+08:00,9.24,12.0,14.0,15.5,17.5,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+0730103WL,Sg. Kelantan di Air Mulih (F1),Pasir Mas,Sungai Kelantan,Sg. Kelantan,2026-08-24 02:00:00+08:00,1.2,4.0,9.0,9.82,10.65,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+0740121WL,Sg. Golok di Rantau Panjang (F1),Pasir Mas,Sungai Golok,Sg. Golok,2026-08-20 21:00:00+08:00,4.52,5.0,7.0,8.0,9.0,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+0730581WL,Sg. Kelantan di Jambatan Tendong (F2),Pasir Mas,Sungai Kelantan,Sg. Kelantan,2026-08-24 02:00:00+08:00,1.18,3.0,4.0,5.0,6.0,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+,Sg. Kelantan di Kg. Salor (F1),Kota Bharu,Sungai Kelantan,Sg. Salor,2026-08-24 02:00:00+08:00,5.39,1.0,9.0,9.8,10.6,False,0.45729166666666665,False,KEL,2026-08-23T18:12:52.816207+00:00
+0730671WL,Sg. Kelantan di Tambatan D'Raja (F1),Kota Bharu,Sungai Kelantan,Sg. Kelantan,2026-08-24 02:00:00+08:00,0.18,1.0,3.0,4.0,5.0,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+0731301WL,Sg. Kelantan di Kuala Besar (F1),Kota Bharu,Sungai Kelantan,Sg. Kelantan,2026-08-24 02:00:00+08:00,0.78,1.3,1.5,1.7,1.85,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+0740241WL,Sg. Golok di Kuala Jambu (F1),Tumpat,Sungai Golok,Sg. Golok,2026-08-24 02:00:00+08:00,1.1,0.7,2.0,2.5,3.0,False,0.17391304347826095,False,KEL,2026-08-23T18:12:52.816207+00:00
+0720101WL,Sg. Melor di Jambatan Melor (F2),Bachok,Sungai Kemasin,Sg. Melor,2026-08-24 02:00:00+08:00,5.45,6.0,7.0,8.0,9.0,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+0710121WL,Sg. Buaya Ikat di Kg. Pulau Lima (F2),Pasir Puteh,Sungai Semerak,Sg. Buaya Ikat,2026-08-24 02:00:00+08:00,0.56,1.0,2.0,3.0,4.0,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
+0710161WL,Sg. Semerak di Tok Bali (F2),Pasir Puteh,Sungai Semerak,Sg. Semerak,2026-08-24 02:00:00+08:00,1.36,0.0,2.5,3.0,4.0,False,0.34,False,KEL,2026-08-23T18:12:52.816207+00:00
+0731001WL,Sg. Semerak di Pasir Puteh (F1),Pasir Puteh,Sungai Semerak,Sg. Semerak,2026-08-24 02:00:00+08:00,1.81,2.0,2.5,3.0,3.2,False,0.0,False,KEL,2026-08-23T18:12:52.816207+00:00
